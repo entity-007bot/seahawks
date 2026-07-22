@@ -290,13 +290,7 @@ export default function PortalPage() {
       });
       localStorage.setItem("privateers_db_logs", JSON.stringify(dbLogs));
 
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      localStorage.setItem("simulated_verification_code", code);
-      localStorage.setItem("simulated_verification_email", regForm.email);
-      setSimulatedVerifyCode(code);
-      setVerifyEmailAddress(regForm.email);
-
-      // Dispatch real-time backend email via SMTP relay
+      // Dispatch real-time backend email via SMTP relay notifying pending status
       try {
         await fetch("/api/emails/dispatch", {
           method: "POST",
@@ -304,20 +298,19 @@ export default function PortalPage() {
           body: JSON.stringify({
             sender: "scribe@corsairs-fellowship.org",
             recipient: regForm.email,
-            subject: "National Association of Privateers - Email Verification Code",
-            body: `Your verification code is ${code}. Assigned Marque: ${randomMqe}. Please enter this code in the portal to activate your commission.`,
-            code,
-            type: "verification"
+            subject: "National Association of Privateers - Recruitment Application Received",
+            body: `Greetings ${regForm.name}, your onboarding pledge has been lodged in the Scribe's Ledger. Assigned Marque: ${randomMqe}. Your application status is now PENDING ADMIN REVIEW. Once approved by the Command Council, your credentials will become active.`,
+            type: "application_received"
           })
         });
       } catch (err) {}
 
-      setSuccessMsg(`✓ Application Logged. Assigned Temp MQE: ${randomMqe}. Real-time backend verification email (${code}) successfully sent to ${regForm.email}. Redirecting...`);
+      setSuccessMsg(`✓ Application successfully lodged! Assigned Marque Number: ${randomMqe}. Your account is now Pending Admin Approval. Once approved by the Command Office, you may log in.`);
       setTimeout(() => {
-        setMode("verify");
+        setMode("login");
         setRegStep(1);
         setSuccessMsg("");
-      }, 4000);
+      }, 4500);
 
     } catch (err) {
       setErrorMsg("✕ Failed to lodge recruitment file. Scribe desk is currently busy.");

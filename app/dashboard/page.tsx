@@ -38,7 +38,8 @@ import {
   RefreshCw,
   Sliders,
   Menu,
-  X
+  X,
+  Mail
 } from "lucide-react";
 import { PrivateersLogo } from "@/components/privateers-logo";
 import { useRouter } from "next/navigation";
@@ -445,6 +446,38 @@ export default function DashboardPage() {
   // Document upload state
   const [newDoc, setNewDoc] = useState({ title: "", category: "Minutes" as any });
 
+  // Meeting & Conclave states
+  const [isMeetingFormOpen, setIsMeetingFormOpen] = useState(false);
+  const [meetingForm, setMeetingForm] = useState({
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    meetingLink: "",
+    description: ""
+  });
+  const [meetingCommentsMap, setMeetingCommentsMap] = useState<Record<string, Array<{ id: string; author: string; text: string; time: string }>>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+
+  const handlePostMeetingComment = (eventId: string, authorName: string) => {
+    const text = commentInputs[eventId];
+    if (!text || !text.trim()) return;
+    const currentList = meetingCommentsMap[eventId] || [];
+    const updatedList = [
+      ...currentList,
+      {
+        id: `mcom_${Date.now()}`,
+        author: authorName,
+        text: text.trim(),
+        time: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      }
+    ];
+    const newMap = { ...meetingCommentsMap, [eventId]: updatedList };
+    setMeetingCommentsMap(newMap);
+    localStorage.setItem("privateers_meeting_comments", JSON.stringify(newMap));
+    setCommentInputs({ ...commentInputs, [eventId]: "" });
+  };
+
   // Sync / Load database from localStorage
   const syncDatabase = () => {
     const localMembers = localStorage.getItem("privateers_db_members");
@@ -620,6 +653,22 @@ export default function DashboardPage() {
       setEvents(defaultEvents);
     } else {
       setEvents(JSON.parse(localEvents));
+    }
+
+    const localMeetingComments = localStorage.getItem("privateers_meeting_comments");
+    if (localMeetingComments) {
+      try {
+        setMeetingCommentsMap(JSON.parse(localMeetingComments));
+      } catch (e) {}
+    } else {
+      const defaultMap = {
+        "evt_1": [
+          { id: "cm_1", author: "Admiral David", text: "Looking forward to seeing all captains at the Grand Deck Assembly Hall.", time: "2026-07-21 10:30 AM" },
+          { id: "cm_2", author: "Anne Bonny", text: "Zoom dial-in link verified. I will be joining virtually from Bonny Estuary.", time: "2026-07-21 02:15 PM" }
+        ]
+      };
+      setMeetingCommentsMap(defaultMap);
+      localStorage.setItem("privateers_meeting_comments", JSON.stringify(defaultMap));
     }
 
     if (!localDocs) {
@@ -3578,13 +3627,22 @@ export default function DashboardPage() {
                       <p className="text-xs text-slate-400 font-light">Physical and virtual meetings of the GND Chapter. Verify your attendance via secure QR-code scanning.</p>
                     </div>
 
-                    <button 
-                      onClick={handleStartScanner}
-                      className="px-5 py-3 bg-gradient-to-r from-red-800 to-red-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl border border-red-700 shadow-md flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                    >
-                      <Camera size={14} className="text-amber-400" />
-                      Scan Attendance QR Code
-                    </button>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <button 
+                        onClick={() => setIsMeetingFormOpen(true)}
+                        className="px-4 py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold uppercase tracking-widest rounded-xl border border-amber-500 shadow-md flex items-center gap-2 transition-all cursor-pointer"
+                      >
+                        <Plus size={14} /> Post Meeting Link
+                      </button>
+
+                      <button 
+                        onClick={handleStartScanner}
+                        className="px-5 py-3 bg-gradient-to-r from-red-800 to-red-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl border border-red-700 shadow-md flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                      >
+                        <Camera size={14} className="text-amber-400" />
+                        Scan Attendance QR Code
+                      </button>
+                    </div>
                   </div>
 
                   {/* QR SCANNER SIMULATOR MODAL */}
@@ -3732,8 +3790,126 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Meeting Discussion / Comments Board */}
+                      <div className="pt-4 border-t border-slate-800 space-y-3 relative z-10">
+                        <h4 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <MessageSquare size={14} /> Conclave Discussion Board & Member Comments ({ (meetingCommentsMap[evt.id] || []).length })
+                        </h4>
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                          {(!meetingCommentsMap[evt.id] || meetingCommentsMap[evt.id].length === 0) ? (
+                            <p className="text-xs text-slate-500 italic">No comments posted for this meeting yet. Be the first to chime in.</p>
+                          ) : (
+                            meetingCommentsMap[evt.id].map(comm => (
+                              <div key={comm.id} className="bg-slate-950 p-3 rounded-xl border border-slate-850 space-y-1">
+                                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                  <span className="font-bold text-slate-200">{comm.author}</span>
+                                  <span>{comm.time}</span>
+                                </div>
+                                <p className="text-xs text-slate-300 font-light leading-relaxed">{comm.text}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2">
+                          <input
+                            type="text"
+                            value={commentInputs[evt.id] || ""}
+                            onChange={(e) => setCommentInputs({ ...commentInputs, [evt.id]: e.target.value })}
+                            placeholder="Type your question or comment for this meeting..."
+                            className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:border-amber-500"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handlePostMeetingComment(evt.id, session?.name || "Privateer");
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handlePostMeetingComment(evt.id, session?.name || "Privateer")}
+                            className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold uppercase rounded-lg transition-colors cursor-pointer"
+                          >
+                            Post
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
+
+                  {/* MEETING CREATION MODAL */}
+                  {isMeetingFormOpen && (
+                    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+                      <div className="bg-slate-900 border border-slate-800 max-w-lg w-full rounded-2xl p-6 space-y-6 relative overflow-hidden shadow-2xl">
+                        <button 
+                          onClick={() => setIsMeetingFormOpen(false)}
+                          className="absolute top-4 right-4 text-slate-400 hover:text-white"
+                        >
+                          <X size={20} />
+                        </button>
+
+                        <div className="space-y-1 text-left">
+                          <h3 className="font-serif text-lg font-bold text-amber-500">Post New Meeting & Conclave Link</h3>
+                          <p className="text-xs text-slate-400 font-light">Publish meeting details, Zoom/Google Meet conference link, and agenda for chapter members.</p>
+                        </div>
+
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!meetingForm.title || !meetingForm.meetingLink) return;
+                          const newEvent = {
+                            id: `evt_${Date.now()}`,
+                            title: meetingForm.title,
+                            description: meetingForm.description || "GND Chapter Official Conclave & Assembly.",
+                            date: meetingForm.date || new Date().toISOString().split("T")[0],
+                            time: meetingForm.time || "12:00 PM",
+                            location: meetingForm.location || "Virtual / Chapter Headquarters",
+                            meetingLink: meetingForm.meetingLink,
+                            coverImage: "https://picsum.photos/seed/conclave/800/400",
+                            rsvps: [],
+                            attendanceList: [],
+                            reports: "Meeting scheduled by Administration."
+                          };
+                          const updatedEvents = [newEvent, ...events];
+                          setEvents(updatedEvents);
+                          localStorage.setItem("privateers_db_events", JSON.stringify(updatedEvents));
+                          setMeetingForm({ title: "", date: "", time: "", location: "", meetingLink: "", description: "" });
+                          setIsMeetingFormOpen(false);
+                          logSystemAction("MEETING_POSTED", `Published meeting: ${newEvent.title}`);
+                        }} className="space-y-4 text-left">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Meeting / Conclave Title</label>
+                            <input type="text" required value={meetingForm.title} onChange={(e) => setMeetingForm({ ...meetingForm, title: e.target.value })} placeholder="e.g. Q3 Emergency Logistics Conclave" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Date</label>
+                              <input type="date" required value={meetingForm.date} onChange={(e) => setMeetingForm({ ...meetingForm, date: e.target.value })} className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Time</label>
+                              <input type="text" required value={meetingForm.time} onChange={(e) => setMeetingForm({ ...meetingForm, time: e.target.value })} placeholder="10:00 AM" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Physical Location</label>
+                              <input type="text" value={meetingForm.location} onChange={(e) => setMeetingForm({ ...meetingForm, location: e.target.value })} placeholder="Port Harcourt Hall" className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Meeting Link (Zoom / Meet)</label>
+                              <input type="url" required value={meetingForm.meetingLink} onChange={(e) => setMeetingForm({ ...meetingForm, meetingLink: e.target.value })} placeholder="https://zoom.us/j/..." className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Description & Agenda</label>
+                            <textarea rows={3} value={meetingForm.description} onChange={(e) => setMeetingForm({ ...meetingForm, description: e.target.value })} placeholder="Detailed agenda for members..." className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"></textarea>
+                          </div>
+                          <div className="flex justify-end gap-3 pt-2">
+                            <button type="button" onClick={() => setIsMeetingFormOpen(false)} className="px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-xl">Cancel</button>
+                            <button type="submit" className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold uppercase rounded-xl">Publish Meeting</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -6159,6 +6335,78 @@ export default function DashboardPage() {
                               })()}
                             </div>
                           </div>
+                        </div>
+
+                        {/* Inbound Email Simulator (Test Gmail / External Client) */}
+                        <div className="bg-slate-950/60 p-5 border border-slate-850 rounded-xl space-y-4">
+                          <h4 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <Mail size={14} /> Simulate Inbound Email (Test External Client / Gmail)
+                          </h4>
+                          <p className="text-xs text-slate-400 font-light leading-relaxed">
+                            Test sending an external message from your Gmail or personal email address directly into any of your active Scribe mailboxes. It will arrive instantly in the reader panel above.
+                          </p>
+
+                          <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const form = e.currentTarget;
+                            const formData = new FormData(form);
+                            const sender = formData.get("sender") as string;
+                            const recipient = selectedInboxEmail;
+                            const subject = formData.get("subject") as string;
+                            const message = formData.get("message") as string;
+
+                            if (!sender || !subject || !message) return;
+
+                            try {
+                              await fetch("/api/emails/dispatch", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  sender,
+                                  recipient,
+                                  subject,
+                                  body: message,
+                                  type: "simulated_inbound"
+                                })
+                              });
+
+                              const localInquiries = JSON.parse(localStorage.getItem("privateers_contact_logs") || "[]");
+                              localInquiries.unshift({
+                                id: `inq_${Date.now()}`,
+                                name: "External Sender (" + sender.split("@")[0] + ")",
+                                email: sender,
+                                subject,
+                                message,
+                                targetEmail: recipient,
+                                date: new Date().toISOString(),
+                                resolved: false
+                              });
+                              localStorage.setItem("privateers_contact_logs", JSON.stringify(localInquiries));
+                              setMailboxInquiries(localInquiries);
+                              setMailboxSuccess(`✓ Simulated inbound email successfully received from ${sender} into ${recipient}!`);
+                              form.reset();
+                            } catch (err) {
+                              setMailboxError("✕ Failed to simulate inbound email delivery.");
+                            }
+                          }} className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1 text-left">
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-bold font-mono text-slate-400 uppercase">From (e.g. yourname@gmail.com)</label>
+                              <input type="email" name="sender" required placeholder="david@gmail.com" className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100" />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-bold font-mono text-slate-400 uppercase">Subject</label>
+                              <input type="text" name="subject" required placeholder="Inquiry about Maritime Chapter" className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100" />
+                            </div>
+                            <div className="sm:col-span-2 space-y-1">
+                              <label className="text-[9px] font-bold font-mono text-slate-400 uppercase">Message Body</label>
+                              <textarea name="message" required rows={2} placeholder="Hello Scribe, I would like to inquire about joining the Great Niger Delta Chapter..." className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100"></textarea>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <button type="submit" className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                <Mail size={12} /> Simulate Inbound Delivery to {selectedInboxEmail}
+                              </button>
+                            </div>
+                          </form>
                         </div>
                       </div>
                     </div>
