@@ -1,0 +1,6 @@
+{
+  "name": "National Association of Privateers",
+  "description": "Official portal of the Corsairs of the Great Niger Delta. A premium membership management and collaboration platform.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), Inter, sans-serif;
+  --color-brand-red: #991b1b;
+  --color-brand-blue: #1e3a8a;
+  --color-brand-dark: #0f172a;
+  --color-brand-cream: #faf6ee;
+}
+
+@layer utilities {
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+}
