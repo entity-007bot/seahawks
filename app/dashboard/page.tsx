@@ -446,6 +446,31 @@ export default function DashboardPage() {
   // Document upload state
   const [newDoc, setNewDoc] = useState({ title: "", category: "Minutes" as any });
 
+  // Chat Room creation modal states
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [newChatForm, setNewChatForm] = useState({ name: "", description: "" });
+
+  const handleCreateChatRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChatForm.name.trim() || !newChatForm.description.trim()) return;
+    const newRoom = {
+      id: `chat_${Date.now()}`,
+      name: newChatForm.name.trim(),
+      description: newChatForm.description.trim(),
+      unread: false,
+      messages: [
+        { sender: session?.name || "Admiral David", rank: session?.rank || "Admiral", text: `Channel ${newChatForm.name.trim()} established for: ${newChatForm.description.trim()}`, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
+      ]
+    };
+    const updatedChats = [newRoom, ...chatRooms];
+    setChatRooms(updatedChats);
+    localStorage.setItem("privateers_db_chats", JSON.stringify(updatedChats));
+    setActiveChatId(newRoom.id);
+    setNewChatForm({ name: "", description: "" });
+    setIsChatModalOpen(false);
+    logSystemAction("CHATROOM_CREATED", `Created dispatch channel: ${newRoom.name}`);
+  };
+
   // Meeting & Conclave states
   const [isMeetingFormOpen, setIsMeetingFormOpen] = useState(false);
   const [meetingForm, setMeetingForm] = useState({
@@ -3359,10 +3384,17 @@ export default function DashboardPage() {
                       
                       {/* Left Sidebar: 8 Chat Rooms List */}
                       <div className="lg:col-span-4 border-r border-slate-900/60 p-4 space-y-4 max-h-[600px] overflow-y-auto">
-                        <div className="pb-2 border-b border-slate-900/80 text-left">
+                        <div className="pb-2 border-b border-slate-900/80 flex items-center justify-between text-left">
                           <h3 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
-                            8 Fleet Channels
+                            Fleet Channels ({ chatRooms.length })
                           </h3>
+                          <button
+                            onClick={() => setIsChatModalOpen(true)}
+                            className="p-1.5 bg-amber-600 hover:bg-amber-500 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+                            title="Create New Dispatch Chatroom"
+                          >
+                            <Plus size={14} />
+                          </button>
                         </div>
                         <div className="space-y-2">
                           {chatRooms.map((room) => {
@@ -3495,6 +3527,65 @@ export default function DashboardPage() {
                         })()}
                       </div>
 
+                    </div>
+                  )}
+
+                  {/* CREATE CHATROOM MODAL */}
+                  {isChatModalOpen && (
+                    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+                      <div className="bg-slate-900 border border-slate-800 max-w-md w-full rounded-2xl p-6 space-y-6 relative overflow-hidden shadow-2xl text-left">
+                        <button 
+                          onClick={() => setIsChatModalOpen(false)}
+                          className="absolute top-4 right-4 text-slate-400 hover:text-white"
+                        >
+                          <X size={20} />
+                        </button>
+
+                        <div className="space-y-1">
+                          <h3 className="font-serif text-lg font-bold text-amber-500">Create Dispatch Chatroom</h3>
+                          <p className="text-xs text-slate-400 font-light">Set up a new secure channel for chapter communication and fleet coordination.</p>
+                        </div>
+
+                        <form onSubmit={handleCreateChatRoom} className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Room Name</label>
+                            <input 
+                              type="text" 
+                              required 
+                              value={newChatForm.name} 
+                              onChange={(e) => setNewChatForm({ ...newChatForm, name: e.target.value })} 
+                              placeholder="e.g. #escravos-logistics" 
+                              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" 
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold font-mono text-slate-400 uppercase">Purpose / Description</label>
+                            <textarea 
+                              rows={3} 
+                              required 
+                              value={newChatForm.description} 
+                              onChange={(e) => setNewChatForm({ ...newChatForm, description: e.target.value })} 
+                              placeholder="Purpose of this channel..." 
+                              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                            ></textarea>
+                          </div>
+                          <div className="flex justify-end gap-3 pt-2">
+                            <button 
+                              type="button" 
+                              onClick={() => setIsChatModalOpen(false)} 
+                              className="px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-xl"
+                            >
+                              Cancel
+                            </button>
+                            <button 
+                              type="submit" 
+                              className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold uppercase rounded-xl font-bold"
+                            >
+                              Create Channel
+                            </button>
+                          </div>
+                        </form>
+                      </div>
                     </div>
                   )}
                 </motion.div>
