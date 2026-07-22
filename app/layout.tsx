@@ -13,8 +13,11 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  title: 'National Association of Privateers | Great Niger Delta Chapter Portal',
-  description: 'Official Digital Portal & Sovereign Maritime Guild of the National Association of Privateers (Great Niger Delta Chapter). Verified Room Suites, Member Management, Directives, and Meeting Links.',
+  title: {
+    default: 'National Association of Privateers | Sovereign Maritime Portal',
+    template: '%s | National Association of Privateers',
+  },
+  description: 'Official Digital Portal & Sovereign Maritime Guild of the National Association of Privateers (Great Niger Delta Chapter). Verified Room Suites, Member Management, Directives, Chapter Records, and Meeting Links.',
   keywords: [
     'National Association of Privateers',
     'Great Niger Delta Chapter',
@@ -27,11 +30,17 @@ export const metadata: Metadata = {
     'Robotic Indexing',
     'Waiting Index',
     'Corsairs Digital Portal',
-    'Maritime Security & Service'
+    'Maritime Security & Service',
+    'Privateers Assembly',
+    'Delta State Privateers',
+    'Rivers State Corsairs',
+    'Sovereign Guild Portal'
   ],
   authors: [{ name: 'Admiralty Command Council' }],
   creator: 'National Association of Privateers',
   publisher: 'National Association of Privateers',
+  applicationName: 'National Association of Privateers Portal',
+  category: 'Maritime & Community Association',
   metadataBase: new URL('https://national-association-of-privateers.org'),
   alternates: {
     canonical: '/',
@@ -69,18 +78,25 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'National Association of Privateers',
     description: 'Official Sovereign Digital Portal of the Great Niger Delta Privateers & Corsairs.',
+    images: ['/assets/og-image.png'],
   },
   other: {
     'crawling-index': 'active',
     'creeping-index': 'enabled',
     'robotic-indexing': 'allow-all',
     'waiting-index': 'standby-verified',
+    'search-engine-index': 'enabled-global',
     'google-site-verification': 'google_search_console_verified_instant_index',
+    'bingbot': 'index, follow, max-snippet:-1, max-image-preview:large',
+    'revisit-after': '1 days',
+    'rating': 'general',
+    'distribution': 'global',
+    'coverage': 'Worldwide',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const jsonLd = {
+  const jsonLdOrg = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'National Association of Privateers',
@@ -96,13 +112,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     sameAs: [],
   };
 
+  const jsonLdWebSite = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'National Association of Privateers',
+    url: 'https://national-association-of-privateers.org',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://national-association-of-privateers.org/dashboard?search={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="en" className={`${inter.variable} ${cinzel.variable}`}>
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLdOrg, jsonLdWebSite]) }}
         />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <meta name="slurp" content="index, follow" />
+        <meta name="duckduckbot" content="index, follow" />
+        <meta name="crawler-indexing" content="enabled-allow-all" />
       </head>
       <body className="font-sans antialiased text-slate-100 bg-[#020617] selection:bg-amber-500 selection:text-slate-950" suppressHydrationWarning>
         {children}

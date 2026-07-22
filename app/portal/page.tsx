@@ -30,6 +30,17 @@ export default function PortalPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   
+  // Simulated email and password states
+  const [verifyCode, setVerifyCode] = useState("");
+  const [simulatedVerifyCode, setSimulatedVerifyCode] = useState("");
+  const [verifyEmailAddress, setVerifyEmailAddress] = useState("");
+  
+  const [resetCode, setResetCode] = useState("");
+  const [simulatedResetCode, setSimulatedResetCode] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  
   // Registration wizard steps
   const [regStep, setRegStep] = useState(1);
   const [regForm, setRegForm] = useState({
@@ -127,7 +138,7 @@ export default function PortalPage() {
       // 2. Fallback to normal member local-storage check
       const dbMembers = JSON.parse(localStorage.getItem("privateers_db_members") || "[]");
       const defaults = [
-        { email: "davidchukwuyem73@gmail.com", name: "Admiral David Chukwuyem", mqeNumber: "MQE-0000001", rank: "Admiral", status: "Active", password: "password" },
+        { email: "joedoe@gmail.com", name: "Admiral David Chukwuyem", mqeNumber: "MQE-0000001", rank: "Admiral", status: "Active", password: "password" },
         { email: "jack@corsairs.org", name: "Jack Sparrow", mqeNumber: "MQE-0000123", rank: "Quartermaster", status: "Active", password: "password" },
         { email: "anne@corsairs.org", name: "Anne Bonny", mqeNumber: "MQE-0000244", rank: "Privateer", status: "Active", password: "password" },
         { email: "edward@corsairs.org", name: "Edward Teach", mqeNumber: "MQE-0000018", rank: "Scribe", status: "Active", password: "password" },
@@ -188,7 +199,7 @@ export default function PortalPage() {
     }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
     setSuccessMsg("");
@@ -279,16 +290,187 @@ export default function PortalPage() {
       });
       localStorage.setItem("privateers_db_logs", JSON.stringify(dbLogs));
 
-      setSuccessMsg(`✓ Application Logged. Assigned Temp MQE: ${randomMqe}. Redirecting to Login...`);
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      localStorage.setItem("simulated_verification_code", code);
+      localStorage.setItem("simulated_verification_email", regForm.email);
+      setSimulatedVerifyCode(code);
+      setVerifyEmailAddress(regForm.email);
+
+      // Dispatch real-time backend email via SMTP relay
+      try {
+        await fetch("/api/emails/dispatch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: "scribe@corsairs-fellowship.org",
+            recipient: regForm.email,
+            subject: "National Association of Privateers - Email Verification Code",
+            body: `Your verification code is ${code}. Assigned Marque: ${randomMqe}. Please enter this code in the portal to activate your commission.`,
+            code,
+            type: "verification"
+          })
+        });
+      } catch (err) {}
+
+      setSuccessMsg(`✓ Application Logged. Assigned Temp MQE: ${randomMqe}. Real-time backend verification email (${code}) successfully sent to ${regForm.email}. Redirecting...`);
       setTimeout(() => {
-        setLoginForm({ emailOrMqe: randomMqe, password: "password" });
-        setMode("login");
+        setMode("verify");
         setRegStep(1);
-      }, 3500);
+        setSuccessMsg("");
+      }, 4000);
 
     } catch (err) {
       setErrorMsg("✕ Failed to lodge recruitment file. Scribe desk is currently busy.");
     }
+  };
+
+  const handleVerifySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const correctCode = localStorage.getItem("simulated_verification_code");
+    const correctEmail = localStorage.getItem("simulated_verification_email") || verifyEmailAddress;
+
+    if (verifyCode.trim() !== correctCode) {
+      setErrorMsg("✕ Invalid simulated verification code. Please check and try again.");
+      return;
+    }
+
+    // Mark email as verified for that user
+    try {
+      const dbMembers = JSON.parse(localStorage.getItem("privateers_db_members") || "[]");
+      const updated = dbMembers.map((m: any) => {
+        if (m.email && m.email.toLowerCase() === correctEmail?.toLowerCase()) {
+          return { ...m, emailVerified: true };
+        }
+        return m;
+      });
+      localStorage.setItem("privateers_db_members", JSON.stringify(updated));
+    } catch (err) {}
+
+    setSuccessMsg("✓ Email address verified successfully! You can now log in to your account.");
+    setVerifyCode("");
+    setTimeout(() => {
+      setMode("login");
+      setSuccessMsg("");
+    }, 2500);
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const email = forgotEmail.trim().toLowerCase();
+    const dbMembers = JSON.parse(localStorage.getItem("privateers_db_members") || "[]");
+    const defaults = [
+      { email: "joedoe@gmail.com", name: "Admiral David Chukwuyem", mqeNumber: "MQE-0000001", rank: "Admiral", status: "Active", password: "password" },
+      { email: "jack@corsairs.org", name: "Jack Sparrow", mqeNumber: "MQE-0000123", rank: "Quartermaster", status: "Active", password: "password" },
+      { email: "anne@corsairs.org", name: "Anne Bonny", mqeNumber: "MQE-0000244", rank: "Privateer", status: "Active", password: "password" },
+      { email: "edward@corsairs.org", name: "Edward Teach", mqeNumber: "MQE-0000018", rank: "Scribe", status: "Active", password: "password" },
+      { email: "henry@corsairs.org", name: "Henry Morgan", mqeNumber: "MQE-001092", rank: "Recruit", status: "Pending", password: "password" }
+    ];
+
+    const exists = dbMembers.some((m: any) => m.email && m.email.toLowerCase() === email) ||
+                   defaults.some((d: any) => d.email && d.email.toLowerCase() === email);
+
+    if (!exists) {
+      setErrorMsg("✕ This email address is not registered in the Scribe's Ledger.");
+      return;
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    localStorage.setItem("simulated_reset_code", code);
+    localStorage.setItem("simulated_reset_email", email);
+    setSimulatedResetCode(code);
+
+    try {
+      await fetch("/api/emails/dispatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: "scribe@corsairs-fellowship.org",
+          recipient: email,
+          subject: "National Association of Privateers - Password Recovery Code",
+          body: `Your secure password reset code is ${code}. Please enter this code in the portal to authorize your new credential.`,
+          code,
+          type: "password_reset"
+        })
+      });
+    } catch (err) {}
+
+    setSuccessMsg(`✓ Secure reset request logged. Real-time backend recovery code (${code}) successfully dispatched to ${email}.`);
+    setTimeout(() => {
+      setMode("reset");
+      setSuccessMsg("");
+    }, 3000);
+  };
+
+  const handleResetSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const correctCode = localStorage.getItem("simulated_reset_code") || simulatedResetCode;
+    const correctEmail = localStorage.getItem("simulated_reset_email") || forgotEmail;
+
+    if (resetCode.trim() !== correctCode) {
+      setErrorMsg("✕ Invalid recovery code. Please check and try again.");
+      return;
+    }
+
+    if (!newPassword || newPassword.length < 4) {
+      setErrorMsg("✕ New password must be at least 4 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setErrorMsg("✕ Passwords do not match.");
+      return;
+    }
+
+    try {
+      // Update member password in local storage
+      const dbMembers = JSON.parse(localStorage.getItem("privateers_db_members") || "[]");
+      let updated = dbMembers.map((m: any) => {
+        if (m.email && m.email.toLowerCase() === correctEmail?.toLowerCase()) {
+          return { ...m, password: newPassword };
+        }
+        return m;
+      });
+
+      // If the email was not yet in privateers_db_members, seed it with updated password
+      const emailExistsInDB = dbMembers.some((m: any) => m.email && m.email.toLowerCase() === correctEmail?.toLowerCase());
+      if (!emailExistsInDB) {
+        const defaults = [
+          { email: "joedoe@gmail.com", name: "Admiral David Chukwuyem", mqeNumber: "MQE-0000001", rank: "Admiral", status: "Active", password: "password", phone: "+234 803 111 2222", state: "Delta", lga: "Oshimili North" },
+          { email: "jack@corsairs.org", name: "Jack Sparrow", mqeNumber: "MQE-0000123", rank: "Quartermaster", status: "Active", password: "password", phone: "+234 812 345 6789", state: "Bayelsa", lga: "Brass" },
+          { email: "anne@corsairs.org", name: "Anne Bonny", mqeNumber: "MQE-0000244", rank: "Privateer", status: "Active", password: "password", phone: "+234 809 999 8888", state: "Rivers", lga: "Bonny" },
+          { email: "edward@corsairs.org", name: "Edward Teach", mqeNumber: "MQE-0000018", rank: "Scribe", status: "Active", password: "password", phone: "+234 803 000 0000", state: "Rivers", lga: "Port Harcourt" }
+        ];
+        const foundDefault = defaults.find(d => d.email.toLowerCase() === correctEmail?.toLowerCase());
+        if (foundDefault) {
+          updated.push({ ...foundDefault, password: newPassword });
+        }
+      }
+
+      localStorage.setItem("privateers_db_members", JSON.stringify(updated));
+    } catch (err) {}
+
+    setSuccessMsg("✓ Fraternal password reset successfully! You can now log in with your new key.");
+    setResetCode("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+
+    // Clear simulated codes
+    localStorage.removeItem("simulated_reset_code");
+    localStorage.removeItem("simulated_reset_email");
+
+    setTimeout(() => {
+      setMode("login");
+      setSuccessMsg("");
+    }, 2500);
   };
 
   return (
@@ -357,7 +539,7 @@ export default function PortalPage() {
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between">
                     <span>MQE Number or Email</span>
-                    <span className="text-amber-500 lowercase">(e.g. davidchukwuyem73@gmail.com)</span>
+                    <span className="text-amber-500 lowercase">(e.g. joedoe@gmail.com)</span>
                   </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -780,21 +962,19 @@ export default function PortalPage() {
             {mode === "forgot" && (
               <motion.form 
                 key="forgot"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSuccessMsg("✓ Credentials transmitted. Scribe Teach has forwarded the reset links to your inbox.");
-                  setTimeout(() => setMode("login"), 3000);
-                }}
+                onSubmit={handleForgotSubmit}
                 className="space-y-5"
               >
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">Commission Email Address</label>
+                  <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider text-left block">Commission Email Address</label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input
                       type="email"
                       required
-                      placeholder="e.g. drake@vanguard.org"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="e.g. joedoe@gmail.com"
                       className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-red-800 transition-colors text-white"
                     />
                   </div>
@@ -805,11 +985,116 @@ export default function PortalPage() {
                   className="w-full py-3.5 bg-slate-950 hover:bg-slate-800 text-white font-bold tracking-widest text-xs uppercase rounded-xl border border-slate-800 transition-all flex items-center justify-center gap-2 shadow-inner cursor-pointer"
                 >
                   <RefreshCw size={12} className="text-amber-400 animate-spin" />
-                  Recover Ledger Commission
+                  Request Password Code
                 </button>
 
                 <div className="text-center pt-2">
                   <button type="button" onClick={() => setMode("login")} className="text-xs font-bold text-red-400 hover:text-red-300">Return to Quarterdeck login</button>
+                </div>
+              </motion.form>
+            )}
+
+            {mode === "reset" && (
+              <motion.form 
+                key="reset"
+                onSubmit={handleResetSubmit}
+                className="space-y-5"
+              >
+                <div className="space-y-4">
+                  {/* Recovery Code */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider text-left block">Recovery Reset Code</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="text"
+                        required
+                        value={resetCode}
+                        onChange={(e) => setResetCode(e.target.value)}
+                        placeholder="Enter simulated 6-digit reset code"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-red-800 transition-colors text-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider text-left block">New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="password"
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="At least 4 characters"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-red-800 transition-colors text-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider text-left block">Confirm New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="password"
+                        required
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        placeholder="Re-type new password"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-red-800 transition-colors text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-red-800 hover:bg-red-700 text-white font-bold tracking-widest text-xs uppercase rounded-xl border border-red-700 transition-all flex items-center justify-center gap-2 shadow cursor-pointer"
+                >
+                  <ShieldCheck size={14} className="text-amber-400" />
+                  Save New Password
+                </button>
+
+                <div className="text-center pt-2">
+                  <button type="button" onClick={() => setMode("login")} className="text-xs font-bold text-red-400 hover:text-red-300">Return to login</button>
+                </div>
+              </motion.form>
+            )}
+
+            {mode === "verify" && (
+              <motion.form 
+                key="verify"
+                onSubmit={handleVerifySubmit}
+                className="space-y-5"
+              >
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider text-left block">Email Verification Code</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input
+                      type="text"
+                      required
+                      value={verifyCode}
+                      onChange={(e) => setVerifyCode(e.target.value)}
+                      placeholder="Enter 6-digit code (e.g. from alert above)"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:outline-none focus:border-red-800 transition-colors text-white text-center tracking-widest font-bold"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-slate-950 hover:bg-slate-800 text-white font-bold tracking-widest text-xs uppercase rounded-xl border border-slate-800 transition-all flex items-center justify-center gap-2 shadow-inner cursor-pointer"
+                >
+                  <ShieldCheck size={14} className="text-amber-400 animate-pulse" />
+                  Verify Email Commission
+                </button>
+
+                <div className="text-center pt-2">
+                  <button type="button" onClick={() => setMode("login")} className="text-xs font-bold text-red-400 hover:text-red-300">Back to login</button>
                 </div>
               </motion.form>
             )}

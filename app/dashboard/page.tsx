@@ -236,6 +236,14 @@ export default function DashboardPage() {
   const [siteLogo, setSiteLogo] = useState<string>("");
   const [siteConfig, setSiteConfig] = useState<any>(DEFAULT_PUBLIC_SITE_CONFIG);
 
+  // Unique Scribe Mailbox states
+  const [adminMailboxes, setAdminMailboxes] = useState<string[]>([]);
+  const [selectedInboxEmail, setSelectedInboxEmail] = useState<string>("");
+  const [mailboxInquiries, setMailboxInquiries] = useState<any[]>([]);
+  const [newMailboxEmail, setNewMailboxEmail] = useState<string>("");
+  const [mailboxError, setMailboxError] = useState<string>("");
+  const [mailboxSuccess, setMailboxSuccess] = useState<string>("");
+
   // Admin sub-navigation states
   const [adminSubTab, setAdminSubTab] = useState<string>("approvals");
   const [adminChatMobileActive, setAdminChatMobileActive] = useState<boolean>(false);
@@ -453,7 +461,7 @@ export default function DashboardPage() {
     if (!localMembers) {
       // Seed data matching lib/db.ts structure
       const defaultMembers = [
-        { id: "mem_1", mqeNumber: "MQE-0000001", name: "Admiral David Chukwuyem", dob: "1988-04-12", phone: "+234 803 111 2222", email: "davidchukwuyem73@gmail.com", profession: "Marine Superintendent", rank: MemberRank.ADMIRAL, status: MemberStatus.ACTIVE, fleet: "Brass River Fleet", chapter: "Great Niger Delta Chapter", committee: "Disciplinary & Letters of Marque Committee", qrCodeCheckins: ["2026-06-15T10:00:00Z", "2026-07-10T11:00:00Z"], biography: "SAEAHAWKS⚓ Commander of the Great Niger Delta Corsairs Chapter. Overseer of all fleet deployments.", skills: ["Vessel Command", "Saber Fencing"], dateJoined: "2026-01-10", state: "Delta", lga: "Oshimili North", residentialAddress: "14 Escravos Way, Warri", emergencyContact: { name: "Evelyn", relation: "Spouse", phone: "+23480" } },
+        { id: "mem_1", mqeNumber: "MQE-0000001", name: "Admiral David Chukwuyem", dob: "1988-04-12", phone: "+234 803 111 2222", email: "joedoe@gmail.com", profession: "Marine Superintendent", rank: MemberRank.ADMIRAL, status: MemberStatus.ACTIVE, fleet: "Brass River Fleet", chapter: "Great Niger Delta Chapter", committee: "Disciplinary & Letters of Marque Committee", qrCodeCheckins: ["2026-06-15T10:00:00Z", "2026-07-10T11:00:00Z"], biography: "SAEAHAWKS⚓ Commander of the Great Niger Delta Corsairs Chapter. Overseer of all fleet deployments.", skills: ["Vessel Command", "Saber Fencing"], dateJoined: "2026-01-10", state: "Delta", lga: "Oshimili North", residentialAddress: "14 Escravos Way, Warri", emergencyContact: { name: "Evelyn", relation: "Spouse", phone: "+23480" } },
         { id: "mem_2", mqeNumber: "MQE-0000123", name: "Captain Jack Sparrow", dob: "1985-06-09", phone: "+234 812 345 6789", email: "jack@corsairs.org", profession: "Deep Sea Navigator", rank: MemberRank.QUARTERMASTER, status: MemberStatus.ACTIVE, fleet: "Brass River Fleet", chapter: "Great Niger Delta Chapter", committee: "Welfare & Cargo Distribution Committee", qrCodeCheckins: ["2026-06-15T10:15:00Z"], biography: "Veteran Privateer and Quartermaster of the GND Chapter.", skills: ["Astrogation"], dateJoined: "2026-01-15", state: "Bayelsa", lga: "Brass", residentialAddress: "Pearl Harbor Marina, Brass", emergencyContact: { name: "Joshamee", relation: "First Mate", phone: "+23481" } },
         { id: "mem_3", mqeNumber: "MQE-0000244", name: "Privateer Anne Bonny", dob: "1994-11-20", phone: "+234 809 999 8888", email: "anne@corsairs.org", profession: "Offshore Engineer", rank: MemberRank.PRIVATEER, status: MemberStatus.ACTIVE, fleet: "Bonny Estuary Fleet", chapter: "Great Niger Delta Chapter", committee: "Welfare & Cargo Distribution Committee", qrCodeCheckins: ["2026-07-10T11:05:00Z"], biography: "Fierce defender of the GND charter. First female Privateer in the chapter.", skills: ["Diesel Propulsion"], dateJoined: "2026-02-01", state: "Rivers", lga: "Bonny", residentialAddress: "8 Harbour Road, Bonny", emergencyContact: { name: "Calico", relation: "Associate", phone: "+23480" } },
         { id: "mem_4", mqeNumber: "MQE-0000018", name: "Scribe Edward Teach", dob: "1980-01-01", phone: "+234 803 000 0000", email: "edward@corsairs.org", profession: "Marine Surveyor", rank: MemberRank.SCRIBE, status: MemberStatus.ACTIVE, fleet: "Bonny Estuary Fleet", chapter: "Great Niger Delta Chapter", committee: "Maritime Logistics & Events Committee", qrCodeCheckins: ["2026-06-15T09:55:00Z"], biography: "Chapter Scribe and Chief Archivist. Keeps the log of GND assembly meetings.", skills: ["Ship Restoration"], dateJoined: "2026-01-12", state: "Rivers", lga: "Port Harcourt", residentialAddress: "Queen Anne's Dockyard", emergencyContact: { name: "Israel", relation: "Bosun", phone: "+23480" } },
@@ -705,6 +713,39 @@ export default function DashboardPage() {
     // Sync public site configuration
     const currentSiteConfig = getPublicSiteConfig();
     setSiteConfig(currentSiteConfig);
+
+    // Sync Scribe Mailboxes and Contact Inquiries
+    const localEmails = localStorage.getItem("privateers_admin_emails");
+    let activeEmails: string[] = [];
+    if (localEmails) {
+      try {
+        activeEmails = JSON.parse(localEmails);
+      } catch (err) {
+        activeEmails = [];
+      }
+    }
+    if (!activeEmails || activeEmails.length === 0) {
+      const host = (typeof window !== "undefined" && window.location.host && !window.location.host.includes("localhost")) ? window.location.host : "seahawks.ai.studio";
+      activeEmails = [
+        `info@${host}`,
+        `dispatch@${host}`,
+        `business@${host}`
+      ];
+      localStorage.setItem("privateers_admin_emails", JSON.stringify(activeEmails));
+    }
+    setAdminMailboxes(activeEmails);
+    setSelectedInboxEmail(prev => prev || activeEmails[0] || "");
+
+    const localInquiries = localStorage.getItem("privateers_contact_logs");
+    let inquiriesList: any[] = [];
+    if (localInquiries) {
+      try {
+        inquiriesList = JSON.parse(localInquiries);
+      } catch (err) {
+        inquiriesList = [];
+      }
+    }
+    setMailboxInquiries(inquiriesList);
 
     setBrandingForm({
       logoUrl: savedLogo,
@@ -1354,6 +1395,80 @@ export default function DashboardPage() {
     setNewDoc({ title: "", category: "Minutes" });
   };
 
+  // Unique Scribe Mailbox handlers
+  const handleCreateMailbox = (e: React.FormEvent) => {
+    e.preventDefault();
+    setMailboxError("");
+    setMailboxSuccess("");
+
+    if (!newMailboxEmail) {
+      setMailboxError("Please enter a valid email address.");
+      return;
+    }
+
+    const email = newMailboxEmail.trim().toLowerCase();
+
+    // Basic email pattern check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMailboxError("✕ Invalid email address format.");
+      return;
+    }
+
+    if (adminMailboxes.includes(email)) {
+      setMailboxError("✕ This unique mailbox is already registered.");
+      return;
+    }
+
+    const updated = [...adminMailboxes, email];
+    localStorage.setItem("privateers_admin_emails", JSON.stringify(updated));
+    setAdminMailboxes(updated);
+    setNewMailboxEmail("");
+    setMailboxSuccess("✓ Unique Scribe Mailbox registered successfully!");
+    
+    // Log in audit trails
+    try {
+      const dbLogs = JSON.parse(localStorage.getItem("privateers_db_logs") || "[]");
+      dbLogs.push({
+        id: `log_${Date.now()}`,
+        userEmail: session?.email || "admin@saeahawks.org",
+        userName: session?.name || "Lord Admiral David Chukwuyem",
+        userMqe: session?.mqeNumber || "MQE-ADMIN-001",
+        action: "SCRIBE_MAILBOX_CREATED",
+        timestamp: new Date().toISOString(),
+        details: `Registered a new unique public contact routing email mailbox: ${email}`
+      });
+      localStorage.setItem("privateers_db_logs", JSON.stringify(dbLogs));
+    } catch (err) {}
+  };
+
+  const handleResolveInquiry = (indexInGlobal: number) => {
+    const updated = [...mailboxInquiries];
+    updated[indexInGlobal] = { ...updated[indexInGlobal], resolved: true };
+    localStorage.setItem("privateers_contact_logs", JSON.stringify(updated));
+    setMailboxInquiries(updated);
+  };
+
+  const handleDeleteInquiry = (indexInGlobal: number) => {
+    const updated = mailboxInquiries.filter((_, idx) => idx !== indexInGlobal);
+    localStorage.setItem("privateers_contact_logs", JSON.stringify(updated));
+    setMailboxInquiries(updated);
+  };
+
+  const handleDeleteMailbox = (emailToDelete: string) => {
+    if (adminMailboxes.length <= 1) {
+      setMailboxError("✕ Cannot delete the last remaining unique routing mailbox.");
+      return;
+    }
+    const updated = adminMailboxes.filter(m => m !== emailToDelete);
+    localStorage.setItem("privateers_admin_emails", JSON.stringify(updated));
+    setAdminMailboxes(updated);
+    if (selectedInboxEmail === emailToDelete) {
+      setSelectedInboxEmail(updated[0] || "");
+    }
+    setMailboxSuccess("✓ Mailbox deregistered successfully.");
+  };
+
   // Camera QR Attendance Simulator/Real trigger
   const handleStartScanner = async () => {
     setShowScanner(true);
@@ -1691,7 +1806,7 @@ export default function DashboardPage() {
       name: "Admiral David Chukwuyem",
       dob: "1988-04-12",
       phone: "+234 803 111 2222",
-      email: "davidchukwuyem73@gmail.com",
+      email: "joedoe@gmail.com",
       profession: "Marine Superintendent",
       rank: MemberRank.ADMIRAL,
       status: MemberStatus.ACTIVE,
@@ -1741,7 +1856,7 @@ export default function DashboardPage() {
 
     const cleanLog = {
       id: `log_${Date.now()}`,
-      userEmail: session?.email || "davidchukwuyem73@gmail.com",
+      userEmail: session?.email || "joedoe@gmail.com",
       userName: session?.name || "Admiral David Chukwuyem",
       userMqe: session?.mqeNumber || "MQE-0000001",
       action: "PRODUCTION_LAUNCH_CLEANUP",
@@ -3790,6 +3905,7 @@ export default function DashboardPage() {
                         { id: "elections_manager", label: "Elections Manager" },
                         { id: "leadership", label: "Leadership Council" },
                         { id: "documents", label: "Archival Library" },
+                        { id: "emails", label: "Unique Scribe Mailboxes" },
                         { id: "database", label: "Clean Production Launch" }
                       ].map(sub => (
                         <button
@@ -5848,6 +5964,201 @@ export default function DashboardPage() {
                             <Trash2 size={16} />
                             Initialize Clean Production System
                           </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 11. emails subtab */}
+                  {adminSubTab === "emails" && (
+                    <div className="space-y-6 text-left">
+                      {/* Subtab Header */}
+                      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div>
+                            <h3 className="text-lg font-serif font-bold text-amber-500">Fraternal Scribe Routing Mailboxes</h3>
+                            <p className="text-xs text-slate-400 font-light">
+                              Register and audit unique routing emails. Public messages submitted on the landing portal are dynamically routed to these dedicated mailboxes.
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-mono bg-blue-950/40 text-blue-400 font-bold border border-blue-900/50 px-2.5 py-1 rounded self-start md:self-auto">
+                            Active Mailboxes: {adminMailboxes.length}
+                          </span>
+                        </div>
+
+                        {/* Error and Success alerts */}
+                        {mailboxError && (
+                          <div className="p-3 bg-red-950/40 border border-red-900/50 rounded-xl text-xs text-red-300">
+                            {mailboxError}
+                          </div>
+                        )}
+                        {mailboxSuccess && (
+                          <div className="p-3 bg-emerald-950/40 border border-emerald-900/50 rounded-xl text-xs text-emerald-300">
+                            {mailboxSuccess}
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                          {/* Register Mailbox Form */}
+                          <div className="lg:col-span-5 bg-slate-950/50 p-4 border border-slate-850 rounded-xl space-y-4">
+                            <h4 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider">Register Scribe Mailbox</h4>
+                            
+                            <form onSubmit={handleCreateMailbox} className="space-y-3">
+                              <div className="space-y-1">
+                                <label className="text-[9px] font-bold font-mono text-slate-400 uppercase tracking-wider block">Custom Scribe Email Address</label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={newMailboxEmail}
+                                  onChange={(e) => setNewMailboxEmail(e.target.value)}
+                                  placeholder="e.g. audit@seahawks.ai.studio"
+                                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100 focus:outline-none focus:border-amber-500"
+                                />
+                              </div>
+
+                              <button
+                                type="submit"
+                                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <Plus size={12} className="text-amber-500" />
+                                Register Mailbox
+                              </button>
+                            </form>
+
+                            <div className="pt-2">
+                              <h5 className="text-[10px] font-mono text-slate-450 uppercase font-bold mb-2">Currently Active Routing Keys:</h5>
+                              <div className="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+                                {adminMailboxes.map((email) => {
+                                  const isDefault = ["info", "dispatch", "business"].some(prefix => email.startsWith(prefix));
+                                  return (
+                                    <div key={email} className="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-850 text-[11px]">
+                                      <span className="font-mono text-slate-300 break-all">{email}</span>
+                                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                        {isDefault ? (
+                                          <span className="text-[8px] font-mono font-bold bg-amber-950/50 text-amber-500 border border-amber-900/30 px-1.5 py-0.5 rounded">
+                                            Default
+                                          </span>
+                                        ) : (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteMailbox(email)}
+                                            className="text-red-500 hover:text-red-400 font-mono text-[9px] uppercase hover:underline"
+                                          >
+                                            Delete
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Mailbox Inbox Viewer */}
+                          <div className="lg:col-span-7 bg-slate-950/50 p-4 border border-slate-850 rounded-xl space-y-4">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
+                              <h4 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-wider">Mailbox Reader Panel</h4>
+                              
+                              {/* Switch active inbox dropdown */}
+                              <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <label className="text-[9px] font-bold font-mono text-slate-450 uppercase tracking-wider whitespace-nowrap">Inbox:</label>
+                                <select
+                                  value={selectedInboxEmail}
+                                  onChange={(e) => setSelectedInboxEmail(e.target.value)}
+                                  className="px-2 py-1 bg-slate-900 border border-slate-800 rounded-md text-xs text-slate-100 focus:outline-none focus:border-amber-500 w-full sm:w-auto"
+                                >
+                                  {adminMailboxes.map((email) => (
+                                    <option key={email} value={email}>
+                                      {email}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Inquiries List under selected mailbox */}
+                            <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                              {(() => {
+                                // Filter inquiries that are mapped to the selectedInboxEmail
+                                const filtered = mailboxInquiries.map((inq, originalIndex) => ({
+                                  ...inq,
+                                  originalIndex
+                                })).filter(inq => 
+                                  inq.targetEmail && inq.targetEmail.toLowerCase() === selectedInboxEmail.toLowerCase()
+                                );
+
+                                if (filtered.length === 0) {
+                                  return (
+                                    <div className="text-center py-10 text-xs text-slate-500 font-light italic">
+                                      No fraternal dispatches or inquiries logged in {selectedInboxEmail} yet.
+                                    </div>
+                                  );
+                                }
+
+                                return filtered.map((inq) => (
+                                  <div 
+                                    key={inq.originalIndex} 
+                                    className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${
+                                      inq.resolved 
+                                        ? "bg-slate-900/30 border-slate-900" 
+                                        : "bg-slate-900/80 border-slate-800 hover:border-slate-750"
+                                    }`}
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="space-y-0.5 text-left">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="font-bold text-slate-200 text-xs">{inq.name}</span>
+                                          <span className="text-[10px] text-slate-450 font-mono">({inq.email})</span>
+                                        </div>
+                                        <h5 className="text-[11px] font-semibold text-amber-500 font-serif">{inq.subject}</h5>
+                                      </div>
+                                      <span className="text-[8px] font-mono text-slate-500 shrink-0">
+                                        {new Date(inq.date).toLocaleDateString()} {new Date(inq.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                      </span>
+                                    </div>
+
+                                    <p className="text-xs text-slate-300 leading-relaxed font-light text-left whitespace-pre-wrap bg-slate-950/40 p-2 rounded-lg border border-slate-900/30">
+                                      {inq.message}
+                                    </p>
+
+                                    <div className="flex items-center justify-between pt-1 border-t border-slate-900/40">
+                                      <div className="flex items-center gap-1.5">
+                                        {inq.resolved ? (
+                                          <span className="text-[8px] font-mono uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/30 px-1.5 py-0.5 rounded font-bold">
+                                            Resolved
+                                          </span>
+                                        ) : (
+                                          <span className="text-[8px] font-mono uppercase bg-red-950/40 text-red-400 border border-red-900/30 px-1.5 py-0.5 rounded font-bold">
+                                            Awaiting Reply
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      <div className="flex items-center gap-2">
+                                        {!inq.resolved && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleResolveInquiry(inq.originalIndex)}
+                                            className="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-amber-500 hover:text-amber-400 border border-slate-800 text-[10px] font-bold rounded"
+                                          >
+                                            Mark Resolved
+                                          </button>
+                                        )}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteInquiry(inq.originalIndex)}
+                                          className="px-2 py-1 bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 border border-red-950/50 text-[10px] font-bold rounded"
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

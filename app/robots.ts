@@ -9,12 +9,17 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/private/*'],
       },
       {
-        userAgent: 'Googlebot',
-        allow: '/',
-        crawlDelay: 1,
-      },
-      {
-        userAgent: 'Bingbot',
+        userAgent: [
+          'Googlebot',
+          'Bingbot',
+          'Slurp',
+          'DuckDuckBot',
+          'Baiduspider',
+          'YandexBot',
+          'facebookexternalhit',
+          'twitterbot',
+          'Applebot'
+        ],
         allow: '/',
         crawlDelay: 1,
       },

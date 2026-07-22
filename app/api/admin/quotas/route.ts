@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as jose from "jose";
 
+export const dynamic = "force-dynamic";
+
 // Standard pre-seeded default quotas
 const defaultQuotas = {
   brassRiverLimit: 15,

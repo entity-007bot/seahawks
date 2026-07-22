@@ -77,7 +77,7 @@ function getSeedData(): PrivateersDB {
       lga: "Oshimili North",
       occupation: "Maritime Logistics Specialist",
       phone: "+234 803 111 2222",
-      email: "davidchukwuyem73@gmail.com", // Auto-aligned to user email
+      email: "joedoe@gmail.com", // Auto-aligned to user email
       residentialAddress: "14 Escravos Way, Warri, Delta State",
       emergencyContact: {
         name: "Mrs. Evelyn Chukwuyem",
@@ -528,7 +528,7 @@ function getSeedData(): PrivateersDB {
   const auditLogs: AuditLog[] = [
     {
       id: "log_1",
-      userEmail: "davidchukwuyem73@gmail.com",
+      userEmail: "joedoe@gmail.com",
       userName: "Admiral David Chukwuyem",
       userMqe: "MQE-0000001",
       action: "CHAPTER_INITIATED",

@@ -44,7 +44,9 @@ export default function PublicPage() {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [blogCategory, setBlogCategory] = useState("All");
-  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", message: "" });
+  
+  const [adminEmails, setAdminEmails] = useState<string[]>([]);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", message: "", targetEmail: "" });
   const [contactSuccess, setContactFormSuccess] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [showLegal, setShowLegal] = useState<"privacy" | "terms" | null>(null);
@@ -427,6 +429,28 @@ export default function PublicPage() {
       setSiteConfig(getPublicSiteConfig());
     }, 0);
 
+    // Initializing unique admin routing emails
+    const localEmails = localStorage.getItem("privateers_admin_emails");
+    let activeEmails: string[] = [];
+    if (localEmails) {
+      try {
+        activeEmails = JSON.parse(localEmails);
+      } catch (err) {
+        activeEmails = [];
+      }
+    }
+    if (!activeEmails || activeEmails.length === 0) {
+      const host = (typeof window !== "undefined" && window.location.host && !window.location.host.includes("localhost")) ? window.location.host : "seahawks.ai.studio";
+      activeEmails = [
+        `info@${host}`,
+        `dispatch@${host}`,
+        `business@${host}`
+      ];
+      localStorage.setItem("privateers_admin_emails", JSON.stringify(activeEmails));
+    }
+    setAdminEmails(activeEmails);
+    setContactForm(prev => ({ ...prev, targetEmail: prev.targetEmail || activeEmails[0] || "" }));
+
     const handleConfigUpdate = () => {
       setSiteConfig(getPublicSiteConfig());
     };
@@ -551,15 +575,34 @@ export default function PublicPage() {
     };
   }, []);
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) return;
 
+    const defaultTarg = adminEmails[0] || "info@seahawks.ai.studio";
+    const selectedTarget = contactForm.targetEmail || defaultTarg;
+
     const logs = JSON.parse(localStorage.getItem("privateers_contact_logs") || "[]");
-    logs.push({ ...contactForm, date: new Date().toISOString() });
+    logs.push({ 
+      ...contactForm, 
+      targetEmail: selectedTarget,
+      date: new Date().toISOString() 
+    });
     localStorage.setItem("privateers_contact_logs", JSON.stringify(logs));
 
     try {
+      await fetch("/api/emails/dispatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: contactForm.email,
+          recipient: selectedTarget,
+          subject: `[Public Inquiry] ${contactForm.subject || "General Inquiry"}`,
+          body: `From: ${contactForm.name} (${contactForm.email})\n\nMessage:\n${contactForm.message}`,
+          type: "contact_inquiry"
+        })
+      });
+
       const dbLogs = JSON.parse(localStorage.getItem("privateers_db_logs") || "[]");
       dbLogs.push({
         id: `log_${Date.now()}`,
@@ -568,13 +611,13 @@ export default function PublicPage() {
         userMqe: "GUEST",
         action: "PUBLIC_CONTACT_SUBMISSION",
         timestamp: new Date().toISOString(),
-        details: `Public contact form submitted: "${contactForm.subject}"`
+        details: `Public contact form dispatched via backend SMTP to ${selectedTarget}: "${contactForm.subject}"`
       });
       localStorage.setItem("privateers_db_logs", JSON.stringify(dbLogs));
     } catch (err) {}
 
     setContactFormSuccess(true);
-    setContactForm({ name: "", email: "", subject: "", message: "" });
+    setContactForm({ name: "", email: "", subject: "", message: "", targetEmail: defaultTarg });
     setTimeout(() => setContactFormSuccess(false), 5000);
   };
 
@@ -1173,7 +1216,7 @@ export default function PublicPage() {
                 <span className="text-amber-500">⚓</span> Scribe Mailbox: <span className="text-white font-semibold">scribe@corsairs-fellowship.org</span>
               </p>
               <p className="flex items-center gap-2">
-                <span className="text-amber-500">⚓</span> Command Office: <span className="text-white font-semibold">davidchukwuyem73@gmail.com</span>
+                <span className="text-amber-500">⚓</span> Command Office: <span className="text-white font-semibold">joedoe@gmail.com</span>
               </p>
             </div>
           </div>
@@ -1203,6 +1246,27 @@ export default function PublicPage() {
                     className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-850 rounded-lg text-xs text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
                   />
                 </div>
+              </div>
+
+              {/* Target Scribe Mailbox Selection */}
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold font-mono text-slate-450 uppercase tracking-wider block text-left">Target Scribe Mailbox</label>
+                <select
+                  value={contactForm.targetEmail}
+                  onChange={(e) => setContactForm({ ...contactForm, targetEmail: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-850 rounded-lg text-xs text-slate-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                >
+                  {adminEmails.map((email) => {
+                    let label = "General Inquiries";
+                    if (email.startsWith("dispatch")) label = "Fleet Dispatch Operations";
+                    if (email.startsWith("business")) label = "Business, Alliances & Conclaves";
+                    return (
+                      <option key={email} value={email}>
+                        {email} ({label})
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               <div className="space-y-1">

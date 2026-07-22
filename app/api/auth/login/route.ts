@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as jose from "jose";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const { emailOrMqe, password } = await req.json();
