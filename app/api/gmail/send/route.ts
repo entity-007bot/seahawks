@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
-import { getStore, updateStore } from "../messages/route";
+import { getStore, updateStore } from "@/lib/gmail-store";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 
