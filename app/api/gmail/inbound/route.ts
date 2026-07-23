@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStore, updateStore, GmailImageDeliveryMessage } from "../messages/route";
+import { getStore, updateStore, GmailImageDeliveryMessage } from "@/lib/gmail-store";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 
