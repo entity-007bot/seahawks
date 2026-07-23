@@ -1,84 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
 
 export const dynamic = "force-dynamic";
 
-export interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  password?: string;
-  superAdmin: boolean;
-  status: "Active" | "Suspended";
-  createdAt: string;
-  createdBy?: string;
-}
-
-const ADMINS_FILE = path.join(process.cwd(), "admin-accounts.json");
-
-let memoryAdmins: AdminUser[] = [
-  {
-    id: "admin_super_1",
-    name: "Lord Admiral David Chukwuyem",
-    email: "davidchukwuyem73@gmail.com",
-    role: "Lord Admiral / Grand Admiral",
-    password: "admiral_secret_command_2026",
-    superAdmin: true,
-    status: "Active",
-    createdAt: "2026-01-01T00:00:00.000Z",
-    createdBy: "System Initializer"
-  },
-  {
-    id: "admin_super_2",
-    name: "Primary Admiralty Command",
-    email: "admin@saeahawks.org",
-    role: "Grand Admiral",
-    password: "admiral_secret_command_2026",
-    superAdmin: true,
-    status: "Active",
-    createdAt: "2026-01-01T00:00:00.000Z",
-    createdBy: "System Initializer"
-  }
-];
-
-export function getAdminAccounts(): AdminUser[] {
-  try {
-    if (fs.existsSync(ADMINS_FILE)) {
-      const data = fs.readFileSync(ADMINS_FILE, "utf-8");
-      memoryAdmins = JSON.parse(data);
-      return memoryAdmins;
-    }
-  } catch (err) {
-    console.warn("Could not read admin accounts file, using memory store:", err);
-  }
-  return memoryAdmins;
-}
-
-export function saveAdminAccounts(admins: AdminUser[]) {
-  memoryAdmins = admins;
-  try {
-    fs.writeFileSync(ADMINS_FILE, JSON.stringify(admins, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("Could not write admin accounts file:", err);
-  }
-}
-
 // GET /api/admin/admins - List all admin users
 export async function GET() {
-  const accounts = getAdminAccounts();
-  // Strip passwords for listing
-  const safeAccounts = accounts.map(({ password, ...rest }) => rest);
-  return NextResponse.json({
-    success: true,
-    admins: safeAccounts
-  });
+  try {
+    const { getAdminAccounts } = await import("@/lib/admin-store");
+    const accounts = getAdminAccounts();
+    // Strip passwords for listing
+    const safeAccounts = accounts.map(({ password, ...rest }) => rest);
+    return NextResponse.json({
+      success: true,
+      admins: safeAccounts
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error.message || "Failed to fetch admins" },
+      { status: 500 }
+    );
+  }
 }
 
 // POST /api/admin/admins - Create a new admin user
 export async function POST(req: NextRequest) {
   try {
+    const { getAdminAccounts, saveAdminAccounts } = await import("@/lib/admin-store");
     const { name, email, role, password, createdBy } = await req.json();
 
     if (!name || !email || !password) {
@@ -98,14 +44,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newAdmin: AdminUser = {
+    const newAdmin = {
       id: `admin_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       name: name.trim(),
       email: cleanEmail,
       role: role || "Co-Administrator",
       password: password,
       superAdmin: true,
-      status: "Active",
+      status: "Active" as const,
       createdAt: new Date().toISOString(),
       createdBy: createdBy || "Grand Admiral"
     };
@@ -131,6 +77,7 @@ export async function POST(req: NextRequest) {
 // DELETE /api/admin/admins - Revoke or delete an admin
 export async function DELETE(req: NextRequest) {
   try {
+    const { getAdminAccounts, saveAdminAccounts } = await import("@/lib/admin-store");
     const { adminId } = await req.json();
     if (!adminId) {
       return NextResponse.json({ success: false, message: "Admin ID is required." }, { status: 400 });
