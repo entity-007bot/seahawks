@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as jose from "jose";
-import { getAdminAccounts } from "@/app/api/admin/admins/route";
+import { getAdminAccounts } from "@/lib/admin-store";
 
 export const dynamic = "force-dynamic";
 
