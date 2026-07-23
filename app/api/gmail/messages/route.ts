@@ -1,54 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { getStore, updateStore, GmailImageDeliveryMessage } from "@/lib/gmail-store";
 
 export const dynamic = "force-dynamic";
-
-export interface GmailImageDeliveryMessage {
-  id: string;
-  threadId?: string;
-  senderName: string;
-  senderEmail: string;
-  subject: string;
-  snippet: string;
-  body: string;
-  timestamp: string;
-  status: "Pending Image Delivery" | "Image Generated" | "Replied & Delivered";
-  requestedImagePrompt?: string;
-  deliveredImageUrl?: string;
-  deliveredMessage?: string;
-  replyTimestamp?: string;
-}
-
-// In-memory backend store for image delivery emails
-let imageDeliveryStore: GmailImageDeliveryMessage[] = [
-  {
-    id: "msg_gmail_1",
-    threadId: "thread_001",
-    senderName: "Admiral David",
-    senderEmail: "davidchukwuyem73@gmail.com",
-    subject: "Image Delivery Request: Custom Maritime Crest Logo",
-    snippet: "Hello, I am requesting a high-resolution crest logo delivery for our coastal vessel...",
-    body: "Hello Image Delivery Team,\n\nI am sending this message from my Gmail app to request a custom high-resolution maritime crest illustration with gold trim and anchor details.\n\nPlease process this request and email me back directly with the image attached.\n\nThank you,\nAdmiral David",
-    timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
-    status: "Pending Image Delivery",
-    requestedImagePrompt: "A majestic gold and navy maritime crest featuring crossed anchors and privateers emblem"
-  },
-  {
-    id: "msg_gmail_2",
-    threadId: "thread_002",
-    senderName: "Captain Jack Sparrow",
-    senderEmail: "jack@corsairs.org",
-    subject: "Urgent Image Delivery: Vessel Inspection Blueprint",
-    snippet: "Requesting high-res nautical blueprint scan for inspection...",
-    body: "Ahoy Image Hub,\n\nKindly send over the detailed nautical vessel architectural blueprint illustration to my inbox.\n\nFair winds,\nCaptain Jack",
-    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-    status: "Replied & Delivered",
-    requestedImagePrompt: "Nautical architectural vessel blueprint with technical grid lines",
-    deliveredImageUrl: "https://picsum.photos/seed/blueprint/800/600",
-    deliveredMessage: "Ahoy Jack! Here is your requested high-resolution nautical blueprint illustration delivered directly to your inbox.",
-    replyTimestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString()
-  }
-];
 
 export async function GET(req: NextRequest) {
   try {
@@ -101,7 +55,8 @@ export async function GET(req: NextRequest) {
             }
 
             // Check if already in our store
-            const existing = imageDeliveryStore.find(m => m.id === msgRef.id);
+            const existingStore = getStore();
+            const existing = existingStore.find(m => m.id === msgRef.id);
             if (!existing) {
               const newMsg: GmailImageDeliveryMessage = {
                 id: msgRef.id,
@@ -126,13 +81,15 @@ export async function GET(req: NextRequest) {
 
     // Merge live messages into store
     if (liveGmailMessages.length > 0) {
-      imageDeliveryStore = [...liveGmailMessages, ...imageDeliveryStore];
+      const currentStore = getStore();
+      updateStore([...liveGmailMessages, ...currentStore]);
     }
 
+    const finalStore = getStore();
     return NextResponse.json({
       success: true,
       siteEmail: "davidchukwuyem73@gmail.com",
-      messages: imageDeliveryStore
+      messages: finalStore
     });
   } catch (error: any) {
     return NextResponse.json({
@@ -140,13 +97,4 @@ export async function GET(req: NextRequest) {
       message: error.message || "Failed to fetch image delivery messages"
     }, { status: 500 });
   }
-}
-
-// Export internal access for other API handlers in same process
-export function getStore() {
-  return imageDeliveryStore;
-}
-
-export function updateStore(updated: GmailImageDeliveryMessage[]) {
-  imageDeliveryStore = updated;
 }
