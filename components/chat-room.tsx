@@ -525,7 +525,7 @@ export function ChatRoom({
                   required
                   value={newRoomName}
                   onChange={(e) => setNewRoomName(e.target.value)}
-                  placeholder="E.g. Calabar Sovereign Suite"
+                  placeholder="E.g. Coastal Operations Suite"
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-amber-500"
                 />
               </div>

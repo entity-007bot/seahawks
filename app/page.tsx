@@ -341,21 +341,8 @@ export default function PublicPage() {
       content: (
         <div className="space-y-4 text-slate-300 text-sm leading-relaxed font-light">
           <p>
-            Our organization is structured into geographic <strong className="text-white font-medium">Fleets</strong>, each led by active officers who steer localized community service programs and protect their home ports.
+            Our organization allows Chapter Administration (Africa / Admiralty Command) to establish custom geographic <strong className="text-white font-medium">Fleets & Chapters</strong> as needed. No predefined fleets exist by default; all active fleets are created directly by Chapter Administration.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { n: "Brass River Fleet", r: "Bayelsa Port Complex", d: "Sovereign fleet focus area centering on marine logistics, river defense education, and community water supply relays." },
-              { n: "Bonny Estuary Fleet", r: "Rivers Port Complex", d: "A historic chapter managing offshore engineering training, coastal cleanups, and maritime scholarship funds." },
-              { n: "Forcados Fleet", r: "Delta Port Complex", d: "Leading-edge chapter dedicated to civic training, local trade mentoring, and emergency relief deployments." }
-            ].map((fl, i) => (
-              <div key={i} className="p-3 bg-slate-900/50 rounded-xl border border-slate-850 space-y-1.5 hover:border-amber-500/10 transition-colors">
-                <span className="text-[10px] font-mono text-amber-500 uppercase">{fl.r}</span>
-                <h5 className="text-xs font-bold text-white font-serif">{fl.n}</h5>
-                <p className="text-[11px] text-slate-400 leading-relaxed font-light">{fl.d}</p>
-              </div>
-            ))}
-          </div>
         </div>
       )
     },

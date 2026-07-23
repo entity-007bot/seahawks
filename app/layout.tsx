@@ -24,7 +24,6 @@ export const metadata: Metadata = {
     'Privateers Corsairs Portal',
     'Maritime Guild Nigeria',
     'Room Suites',
-    'Brass Suite',
     'Crawling Index',
     'Creeping Index',
     'Robotic Indexing',

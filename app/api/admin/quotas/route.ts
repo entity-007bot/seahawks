@@ -5,10 +5,7 @@ export const dynamic = "force-dynamic";
 
 // Standard pre-seeded default quotas
 const defaultQuotas = {
-  brassRiverLimit: 15,
-  bonnyEstuaryLimit: 12,
-  forcadosLimit: 10,
-  recruitmentCap: 25,
+  recruitmentCap: 50,
   monthlyDuesQuota: 1500000, // in NGN
   minVoterTurnoutQuorum: 60, // in percentage
   patrolCampaignLimit: 5,

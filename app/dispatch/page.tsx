@@ -5,72 +5,7 @@ import { MessageSquare, Anchor, Shield, LogOut, ArrowLeft, RefreshCw, Trash2 } f
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const defaultChats = [
-    {
-      id: "chat_1",
-      name: "Brass Suite (Admiralty Command)",
-      description: "Admiral Chukwuyem & Sovereign Leadership Room Suite",
-      unread: false,
-      category: "Executive Suite",
-      messages: []
-    },
-    {
-      id: "chat_2",
-      name: "Bonny Estuary Suite",
-      description: "Rivers Complex member communication & tactical logs",
-      unread: false,
-      category: "Regional Suite",
-      messages: []
-    },
-    {
-      id: "chat_3",
-      name: "Forcados Suite",
-      description: "Delta Complex community coordination & general banter",
-      unread: false,
-      category: "Regional Suite",
-      messages: []
-    },
-    {
-      id: "chat_4",
-      name: "Escravos Suite",
-      description: "Waterway defense education & maritime patrols",
-      unread: false,
-      category: "Operations Suite",
-      messages: []
-    },
-    {
-      id: "chat_5",
-      name: "Akassa Suite",
-      description: "Coastal ecosystem protection & environmental relays",
-      unread: false,
-      category: "Operations Suite",
-      messages: []
-    },
-    {
-      id: "chat_6",
-      name: "Opobo Suite",
-      description: "Maritime heritage preservation & historical archives",
-      unread: false,
-      category: "Culture Suite",
-      messages: []
-    },
-    {
-      id: "chat_7",
-      name: "Nembe Suite",
-      description: "Welfare cargo distribution & emergency relief relays",
-      unread: false,
-      category: "Welfare Suite",
-      messages: []
-    },
-    {
-      id: "chat_8",
-      name: "Calabar Suite",
-      description: "Eastern Channel maritime logistics & recruit orientation",
-      unread: false,
-      category: "Orientation Suite",
-      messages: []
-    }
-];
+const defaultChats: any[] = [];
 
 export default function DispatchPage() {
     const router = useRouter();

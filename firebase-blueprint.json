@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "Email": {
+      "path": "emails/{emailId}",
+      "fields": {
+        "id": { "type": "string" },
+        "sender": { "type": "string" },
+        "recipient": { "type": "string" },
+        "subject": { "type": "string" },
+        "body": { "type": "string" },
+        "code": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    },
+    "GmailInbound": {
+      "path": "gmail_inbound/{msgId}",
+      "fields": {
+        "id": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderEmail": { "type": "string" },
+        "subject": { "type": "string" },
+        "snippet": { "type": "string" },
+        "body": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "status": { "type": "string" },
+        "requestedImagePrompt": { "type": "string" }
+      }
+    },
+    "GmailDelivery": {
+      "path": "gmail_deliveries/{deliveryId}",
+      "fields": {
+        "messageId": { "type": "string" },
+        "recipientEmail": { "type": "string" },
+        "subject": { "type": "string" },
+        "replyBody": { "type": "string" },
+        "deliveredImageUrl": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    }
+  }
+}

@@ -239,7 +239,7 @@ export default function PortalPage() {
         dateJoined: new Date().toISOString().split("T")[0],
         rank: "Recruit",
         status: "Pending",
-        fleet: "Brass River Fleet",
+        fleet: "",
         chapter: "Great Niger Delta Chapter",
         committee: "Maritime Logistics & Events Committee",
         serviceRecord: ["Recruit Application Filed (July 2026)"],

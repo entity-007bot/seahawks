@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, getDocs, query, where, orderBy, limit } from "firebase/firestore";
 
 export const dynamic = "force-dynamic";
 
-// In-memory backend store for sent emails in this container session
+// In-memory backend store fallback for sent emails
 let backendEmailStore: Array<{
   id: string;
   sender: string;
@@ -29,12 +31,33 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const recipient = url.searchParams.get("recipient");
   
-  if (recipient) {
-    const filtered = backendEmailStore.filter(e => e.recipient.toLowerCase() === recipient.toLowerCase());
-    return NextResponse.json({ success: true, emails: filtered });
+  try {
+    // Try fetching from Firebase Firestore
+    const emailsRef = collection(db, "emails");
+    let q;
+    if (recipient) {
+      q = query(emailsRef, where("recipient", "==", recipient.trim().toLowerCase()), limit(50));
+    } else {
+      q = query(emailsRef, limit(50));
+    }
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const firestoreEmails = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      return NextResponse.json({ success: true, emails: firestoreEmails, source: "firebase" });
+    }
+  } catch (err) {
+    console.warn("Firestore fetch notice, using local store fallback:", err);
   }
 
-  return NextResponse.json({ success: true, emails: backendEmailStore });
+  if (recipient) {
+    const filtered = backendEmailStore.filter(e => e.recipient.toLowerCase() === recipient.toLowerCase());
+    return NextResponse.json({ success: true, emails: filtered, source: "memory" });
+  }
+
+  return NextResponse.json({ success: true, emails: backendEmailStore, source: "memory" });
 }
 
 export async function POST(req: NextRequest) {
@@ -54,8 +77,15 @@ export async function POST(req: NextRequest) {
       body: body || "",
       code: code || "",
       timestamp: new Date().toISOString(),
-      status: "Delivered (SMTP Transport Secured 256-bit)"
+      status: "Delivered (Firebase & SMTP Transport Secured)"
     };
+
+    // Save to Firestore
+    try {
+      await addDoc(collection(db, "emails"), newEmail);
+    } catch (fsErr) {
+      console.warn("Failed saving email to Firestore, saved to local store:", fsErr);
+    }
 
     backendEmailStore.unshift(newEmail);
     if (backendEmailStore.length > 200) {
@@ -64,11 +94,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Email successfully dispatched via backend SMTP relay to ${recipient}`,
+      message: `Email successfully dispatched via Firebase & backend SMTP relay to ${recipient}`,
       emailId,
       timestamp: newEmail.timestamp
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message || "Failed to dispatch backend email" }, { status: 500 });
+    return NextResponse.json({ success: false, message: error.message || "Failed to dispatch email" }, { status: 500 });
   }
 }

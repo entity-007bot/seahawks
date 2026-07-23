@@ -1,27 +1,44 @@
 export enum MemberRank {
-  ADMIRAL = "Lord Admiral / Grand Admiral",
-  COMMODORE = "Commodore",
-  CAPTAIN = "Captain of the Flagship",
-  FLEET_MASTER = "Master of the Fleet",
-  QUARTERMASTER_GENERAL = "Quartermaster General",
-  NAVIGATOR_GENERAL = "Navigator General",
-  ADMIRALTY_COUNCIL = "Admiralty Council",
-  CHIEF_BOATSWAIN = "Chief Boatswain",
-  SHIP_CAPTAIN = "Ship Captain",
-  FIRST_LIEUTENANT = "First Lieutenant",
-  MASTER_NAVIGATOR = "Master Navigator",
-  BOATSWAIN = "Boatswain",
-  QUARTERMASTER = "Quartermaster",
-  MASTER_AT_ARMS = "Master-at-Arms",
-  HARBORMASTER = "Harbormaster",
-  COMMUNICATIONS_OFFICER = "Communications Officer",
-  PRIVATEER = "Privateer",
-  LANCED_PRIVATEER = "Lanced Privateer",
+  // Seaman Class
+  LANDSMAN = "Landsman",
+  SEAMAN = "Seaman",
+  ABLE_SEAMAN = "Able Seaman",
   SALTED_SEAMAN = "Salted Seaman",
-  SEAMAN = "seaman",
-  MIDSHIPMAN = "Midshipman",
-  RECRUIT = "Green Hands (someone just recruited)",
-  SCRIBE = "Scribe (Secretary taking records)"
+  SEASONED_SEAMAN = "Seasoned Seaman",
+  WEATHERED_SEAMAN = "Weathered Seaman",
+
+  // Privateer Class
+  ABLE_PRIVATEER = "Able Privateer",
+  PRIVATEER = "Privateer",
+  SENIOR_PRIVATEER = "Senior Privateer",
+  MASTER_PRIVATEER = "Master Privateer",
+  LIEUTENANT_PRIVATEER = "Lieutenant Privateer",
+  COMMANDER_PRIVATEER = "Commander Privateer",
+  CAPTAIN_PRIVATEER = "Captain Privateer",
+  COMMODORE_PRIVATEER = "Commodore Privateer",
+  ADMIRAL_PRIVATEER = "Admiral Privateer",
+
+  // Legacy Alias Mappings for Compatibility
+  ADMIRAL = "Admiral Privateer",
+  COMMODORE = "Commodore Privateer",
+  CAPTAIN = "Captain Privateer",
+  FLEET_MASTER = "Commander Privateer",
+  QUARTERMASTER_GENERAL = "Master Privateer",
+  NAVIGATOR_GENERAL = "Lieutenant Privateer",
+  ADMIRALTY_COUNCIL = "Commodore Privateer",
+  CHIEF_BOATSWAIN = "Master Privateer",
+  SHIP_CAPTAIN = "Captain Privateer",
+  FIRST_LIEUTENANT = "Lieutenant Privateer",
+  MASTER_NAVIGATOR = "Master Privateer",
+  BOATSWAIN = "Senior Privateer",
+  QUARTERMASTER = "Master Privateer",
+  MASTER_AT_ARMS = "Senior Privateer",
+  HARBORMASTER = "Senior Privateer",
+  COMMUNICATIONS_OFFICER = "Privateer",
+  LANCED_PRIVATEER = "Able Privateer",
+  MIDSHIPMAN = "Seaman",
+  RECRUIT = "Landsman",
+  SCRIBE = "Senior Privateer"
 }
 
 export enum MemberStatus {
@@ -30,6 +47,75 @@ export enum MemberStatus {
   SUSPENDED = "Suspended",
   INACTIVE = "Inactive",
   REJECTED = "Rejected"
+}
+
+export interface RankDefinition {
+  id: string;
+  name: string;
+  class: "Seaman Class" | "Privateer Class";
+  tier: number;
+  insignia: string;
+  description: string;
+  requirements: string;
+  responsibilities: string;
+}
+
+export interface DutyDefinition {
+  id: string;
+  title: string;
+  category: "Admiralty Compass" | "Other Offices" | "Custom Office";
+  description: string;
+  eligibleRanks: string[];
+  responsibilities: string[];
+  holderMqe?: string;
+  holderName?: string;
+}
+
+export interface PromotionRecord {
+  id: string;
+  memberMqe: string;
+  memberName: string;
+  previousRank: string;
+  newRank: string;
+  promotedBy: string;
+  promotedAt: string;
+  reason: string;
+}
+
+export interface DutyAssignmentRecord {
+  id: string;
+  memberMqe: string;
+  memberName: string;
+  dutyTitle: string;
+  action: "ASSIGNED" | "REMOVED";
+  assignedBy: string;
+  assignedAt: string;
+  notes?: string;
+}
+
+export interface LeadershipTransferRecord {
+  id: string;
+  officeTitle: string;
+  previousHolderMqe: string;
+  previousHolderName: string;
+  newHolderMqe: string;
+  newHolderName: string;
+  transferredAt: string;
+  transferredBy: string;
+  reason: string;
+}
+
+export type PermissionRole = "Super Admin" | "Lord Admiral" | "Administrator" | "Officer" | "Member";
+
+export interface PermissionConfig {
+  role: PermissionRole;
+  description: string;
+  canManageMembers: boolean;
+  canApprovePromotions: boolean;
+  canAssignDuties: boolean;
+  canTransferLeadership: boolean;
+  canManageSystem: boolean;
+  canManageDues: boolean;
 }
 
 export interface Member {
@@ -55,7 +141,11 @@ export interface Member {
   profession: string;
   biography: string;
   dateJoined: string;
-  rank: MemberRank;
+  rank: MemberRank | string;
+  assignedDuties?: string[];
+  previousRanks?: string[];
+  promotionHistory?: PromotionRecord[];
+  adminRole?: PermissionRole;
   status: MemberStatus;
   suite: string;
   fleet?: string;
@@ -216,4 +306,10 @@ export interface PrivateersDB {
   documents: DocumentFile[];
   auditLogs: AuditLog[];
   leadership?: LeadershipMember[];
+  ranks?: RankDefinition[];
+  duties?: DutyDefinition[];
+  promotions?: PromotionRecord[];
+  dutyLogs?: DutyAssignmentRecord[];
+  leadershipTransfers?: LeadershipTransferRecord[];
+  permissionConfigs?: PermissionConfig[];
 }

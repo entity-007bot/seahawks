@@ -13,11 +13,192 @@ import {
   DocumentFile,
   AuditLog,
   PrivateersDB,
-  LeadershipMember
+  LeadershipMember,
+  RankDefinition,
+  DutyDefinition,
+  PromotionRecord,
+  DutyAssignmentRecord,
+  LeadershipTransferRecord,
+  PermissionConfig
 } from "./types";
 
 export { MemberRank, MemberStatus, ContributionType };
-export type { Member, Application, Contribution, ForumPost, Election, EventLog, DocumentFile, AuditLog, PrivateersDB, LeadershipMember };
+export type { 
+  Member, 
+  Application, 
+  Contribution, 
+  ForumPost, 
+  Election, 
+  EventLog, 
+  DocumentFile, 
+  AuditLog, 
+  PrivateersDB, 
+  LeadershipMember,
+  RankDefinition,
+  DutyDefinition,
+  PromotionRecord,
+  DutyAssignmentRecord,
+  LeadershipTransferRecord,
+  PermissionConfig
+};
+
+export const DEFAULT_RANKS: RankDefinition[] = [
+  // Seaman Class
+  { id: "rank_1", name: "Landsman", class: "Seaman Class", tier: 1, insignia: "⚓", description: "Entry-level member of the Fleet.", requirements: "Learns traditions, discipline, navigation basics, and service values.", responsibilities: "Assists crew and completes seamanship orientation." },
+  { id: "rank_2", name: "Seaman", class: "Seaman Class", tier: 2, insignia: "⛵", description: "Trained sailor who has gained basic experience.", requirements: "3 months active service.", responsibilities: "Standard watchkeeping and maintenance duties." },
+  { id: "rank_3", name: "Able Seaman", class: "Seaman Class", tier: 3, insignia: "🧭", description: "Experienced sailor trusted with greater responsibilities.", requirements: "6 months service + seamanship evaluation.", responsibilities: "Sailing operations and junior crew guidance." },
+  { id: "rank_4", name: "Salted Seaman", class: "Seaman Class", tier: 4, insignia: "🌊", description: "Veteran sailor with proven experience and loyalty.", requirements: "12 months service + conclave participation.", responsibilities: "Deck leadership and task execution." },
+  { id: "rank_5", name: "Seasoned Seaman", class: "Seaman Class", tier: 5, insignia: "🛡️", description: "Highly experienced sailor who has gained wisdom through service.", requirements: "18 months service + committee work.", responsibilities: "Senior crew mentorship." },
+  { id: "rank_6", name: "Weathered Seaman", class: "Seaman Class", tier: 6, insignia: "📜", description: "Senior veteran who has endured challenges and demonstrated reliability.", requirements: "24 months service + exemplary conduct.", responsibilities: "Tradition preservation and deck counsel." },
+
+  // Privateer Class
+  { id: "rank_7", name: "Able Privateer", class: "Privateer Class", tier: 7, insignia: "⚔️", description: "First level of recognized Privateer service.", requirements: "Demonstrates skill, discipline, and commitment.", responsibilities: "Active privateering patrol and fleet duties." },
+  { id: "rank_8", name: "Privateer", class: "Privateer Class", tier: 8, insignia: "🗡️", description: "Fully recognized member of the Privateer Fleet.", requirements: "Letters of Marque evaluation.", responsibilities: "Full tactical and operational participation." },
+  { id: "rank_9", name: "Senior Privateer", class: "Privateer Class", tier: 9, insignia: "🦅", description: "Experienced Privateer trusted with leadership assistance.", requirements: "12 months Privateer service.", responsibilities: "Leadership assistance and squad command." },
+  { id: "rank_10", name: "Master Privateer", class: "Privateer Class", tier: 10, insignia: "🎖️", description: "Senior specialist and warrant-level rank.", requirements: "Proven specialist expertise or Quartermaster track.", responsibilities: "Warrant leadership, logistics & discipline support." },
+  { id: "rank_11", name: "Lieutenant Privateer", class: "Privateer Class", tier: 11, insignia: "🚩", description: "Junior officer rank responsible for command assistance.", requirements: "Officer commission approval.", responsibilities: "Command assistance and navigation support." },
+  { id: "rank_12", name: "Commander Privateer", class: "Privateer Class", tier: 12, insignia: "🔱", description: "Senior officer rank responsible for managing operations.", requirements: "Executive committee recommendation.", responsibilities: "Operations management and fleet coordination." },
+  { id: "rank_13", name: "Captain Privateer", class: "Privateer Class", tier: 13, insignia: "🚢", description: "Highest operational command rank.", requirements: "Command clearance + chapter leadership history.", responsibilities: "Eligible to command a flagship or major chapter." },
+  { id: "rank_14", name: "Commodore Privateer", class: "Privateer Class", tier: 14, insignia: "🌟", description: "Senior fleet command rank.", requirements: "Fleet-wide distinction.", responsibilities: "Eligible for appointment as Commodore of the Association." },
+  { id: "rank_15", name: "Admiral Privateer", class: "Privateer Class", tier: 15, insignia: "👑", description: "Highest rank in the Fleet.", requirements: "Supreme service record + Council elevation.", responsibilities: "Eligible for appointment as Lord Admiral / Grand Admiral of the Fleet." }
+];
+
+export const DEFAULT_DUTIES: DutyDefinition[] = [
+  {
+    id: "duty_lord_admiral",
+    title: "Lord Admiral / Grand Admiral",
+    category: "Admiralty Compass",
+    description: "Supreme Guardian of the Fleet",
+    eligibleRanks: ["Admiral Privateer"],
+    responsibilities: [
+      "Protects the vision and traditions of the Fleet.",
+      "Final authority on major decisions.",
+      "Represents the entire association."
+    ],
+    holderMqe: "MQE-0000001",
+    holderName: "Admiral David Chukwuyem"
+  },
+  {
+    id: "duty_commodore",
+    title: "Commodore",
+    category: "Admiralty Compass",
+    description: "Fleet Coordination Commander",
+    eligibleRanks: ["Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Coordinates ships, chapters, and operations.",
+      "Oversees fleet expansion and strategic routes."
+    ]
+  },
+  {
+    id: "duty_captain_flagship",
+    title: "Captain of the Flagship",
+    category: "Admiralty Compass",
+    description: "Commander of the Main Ship/Chapter",
+    eligibleRanks: ["Captain Privateer", "Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Leads the flagship and primary chapter deck.",
+      "Executes fleet decisions.",
+      "Commands major conclave activities."
+    ],
+    holderMqe: "MQE-0000244",
+    holderName: "Anne Bonny"
+  },
+  {
+    id: "duty_master_fleet",
+    title: "Master of the Fleet",
+    category: "Admiralty Compass",
+    description: "Fleet Organization Officer",
+    eligibleRanks: ["Lieutenant Privateer", "Commander Privateer", "Captain Privateer", "Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Maintains organization and fleet registry.",
+      "Coordinates crews across regional ports.",
+      "Oversees procedures and discipline."
+    ]
+  },
+  {
+    id: "duty_quartermaster_gen",
+    title: "Quartermaster General",
+    category: "Admiralty Compass",
+    description: "Resources and Logistics Officer",
+    eligibleRanks: ["Master Privateer", "Lieutenant Privateer", "Commander Privateer", "Captain Privateer", "Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Manages supplies and cargo distribution.",
+      "Controls resources and ledgers.",
+      "Oversees financial organization and dues auditing."
+    ],
+    holderMqe: "MQE-0000123",
+    holderName: "Jack Sparrow"
+  },
+  {
+    id: "duty_navigator_gen",
+    title: "Navigator General",
+    category: "Admiralty Compass",
+    description: "Strategy and Intelligence Officer",
+    eligibleRanks: ["Lieutenant Privateer", "Commander Privateer", "Captain Privateer", "Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Research and nautical mapping.",
+      "Strategic direction and planning.",
+      "Intelligence and navigation knowledge."
+    ]
+  },
+  {
+    id: "duty_admiralty_council",
+    title: "Admiralty Council Member",
+    category: "Admiralty Compass",
+    description: "Senior Advisor",
+    eligibleRanks: ["Lieutenant Privateer", "Commander Privateer", "Captain Privateer", "Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Advises leadership on strategic policies.",
+      "Reviews major decisions and charter amendments.",
+      "Protects traditions and code of conduct."
+    ]
+  },
+  {
+    id: "duty_chief_boatswain",
+    title: "Chief Boatswain / Master-at-Arms",
+    category: "Admiralty Compass",
+    description: "Discipline and Standards Officer",
+    eligibleRanks: ["Master Privateer", "Lieutenant Privateer", "Commander Privateer", "Captain Privateer", "Commodore Privateer", "Admiral Privateer"],
+    responsibilities: [
+      "Maintains discipline on deck.",
+      "Protects the code of conduct.",
+      "Ensures accountability and conclave security."
+    ]
+  },
+  {
+    id: "duty_scribe",
+    title: "Scribe",
+    category: "Other Offices",
+    description: "Keeper of Records and Traditions",
+    eligibleRanks: [
+      "Landsman", "Seaman", "Able Seaman", "Salted Seaman", "Seasoned Seaman", "Weathered Seaman",
+      "Able Privateer", "Privateer", "Senior Privateer", "Master Privateer",
+      "Lieutenant Privateer", "Commander Privateer", "Captain Privateer", "Commodore Privateer", "Admiral Privateer"
+    ],
+    responsibilities: [
+      "Records meetings, conclaves, and events.",
+      "Maintains archives and document vault.",
+      "Preserves history and documents ceremonies.",
+      "Spiritual/traditional keeper of prayers and reflections."
+    ],
+    holderMqe: "MQE-0000018",
+    holderName: "Edward Teach"
+  }
+];
+
+export const DEFAULT_LEADERSHIP_TRANSFERS: LeadershipTransferRecord[] = [
+  {
+    id: "lt_1",
+    officeTitle: "Lord Admiral / Grand Admiral",
+    previousHolderMqe: "MQE-0000000",
+    previousHolderName: "Sovereign Founder Charter",
+    newHolderMqe: "MQE-0000001",
+    newHolderName: "Admiral David Chukwuyem",
+    transferredAt: "2026-01-10T10:00:00Z",
+    transferredBy: "Founder Assembly",
+    reason: "Initial Charter Conclave Elevation & Founding Appointment as Lord Admiral."
+  }
+];
 
 // In-Memory Fallback
 let memoryDB: PrivateersDB = {
@@ -90,8 +271,8 @@ function getSeedData(): PrivateersDB {
       dateJoined: "2026-01-10",
       rank: MemberRank.ADMIRAL,
       status: MemberStatus.ACTIVE,
-      suite: "Brass Suite",
-      fleet: "Brass Suite",
+      suite: "",
+      fleet: "",
       chapter: "Great Niger Delta Chapter",
       committee: "Disciplinary & Letters of Marque Committee",
       serviceRecord: [
@@ -132,8 +313,8 @@ function getSeedData(): PrivateersDB {
       dateJoined: "2026-01-15",
       rank: MemberRank.QUARTERMASTER,
       status: MemberStatus.ACTIVE,
-      suite: "Brass Suite",
-      fleet: "Brass Suite",
+      suite: "",
+      fleet: "",
       chapter: "Great Niger Delta Chapter",
       committee: "Welfare & Cargo Distribution Committee",
       serviceRecord: [
@@ -174,8 +355,8 @@ function getSeedData(): PrivateersDB {
       dateJoined: "2026-02-01",
       rank: MemberRank.PRIVATEER,
       status: MemberStatus.ACTIVE,
-      suite: "Bonny Estuary Suite",
-      fleet: "Bonny Estuary Suite",
+      suite: "",
+      fleet: "",
       chapter: "Great Niger Delta Chapter",
       committee: "Welfare & Cargo Distribution Committee",
       serviceRecord: [
@@ -214,8 +395,8 @@ function getSeedData(): PrivateersDB {
       dateJoined: "2026-01-12",
       rank: MemberRank.SCRIBE,
       status: MemberStatus.ACTIVE,
-      suite: "Bonny Estuary Suite",
-      fleet: "Bonny Estuary Suite",
+      suite: "",
+      fleet: "",
       chapter: "Great Niger Delta Chapter",
       committee: "Maritime Logistics & Events Committee",
       serviceRecord: [
@@ -254,8 +435,8 @@ function getSeedData(): PrivateersDB {
       dateJoined: "2026-06-25",
       rank: MemberRank.RECRUIT,
       status: MemberStatus.PENDING,
-      suite: "Forcados Suite",
-      fleet: "Forcados Suite",
+      suite: "",
+      fleet: "",
       chapter: "Great Niger Delta Chapter",
       committee: "Maritime Logistics & Events Committee",
       serviceRecord: [
@@ -315,7 +496,7 @@ function getSeedData(): PrivateersDB {
       memberName: "Anne Bonny",
       mqeNumber: "MQE-0000244",
       type: ContributionType.MONTHLY_DUES,
-      description: "Monthly dues for May 2026 - Bonny Estuary Fleet",
+      description: "Monthly dues for May 2026",
       amount: 15000,
       status: "PAID",
       paymentDate: "2026-05-02T11:45:00Z",
@@ -433,7 +614,7 @@ function getSeedData(): PrivateersDB {
           authorId: "mem_3",
           authorName: "Anne Bonny",
           authorRank: MemberRank.PRIVATEER,
-          content: "Excellent timing. The Bonny Estuary Fleet has two patrol boats undergoing scheduled maintenance. I will come to Brass on Tuesday.",
+          content: "Excellent timing. We have two patrol boats undergoing scheduled maintenance. I will come to the port on Tuesday.",
           createdAt: "2026-07-13T09:30:00Z"
         }
       ],
@@ -554,7 +735,12 @@ function getSeedData(): PrivateersDB {
     elections,
     events,
     documents,
-    auditLogs
+    auditLogs,
+    ranks: DEFAULT_RANKS,
+    duties: DEFAULT_DUTIES,
+    promotions: [],
+    dutyLogs: [],
+    leadershipTransfers: DEFAULT_LEADERSHIP_TRANSFERS
   };
 }
 
@@ -569,6 +755,259 @@ export const db = {
   getMemberByMqe: (mqe: string) => {
     return getDB().members.find(m => m.mqeNumber === mqe);
   },
+
+  // Ranks & Duties Management
+  getRanks: () => getDB().ranks || DEFAULT_RANKS,
+
+  updateRanks: (ranks: RankDefinition[], actingUserEmail: string) => {
+    const data = getDB();
+    const actor = data.members.find(m => m.email === actingUserEmail);
+    data.ranks = ranks;
+    db.addAuditLog(
+      actingUserEmail,
+      actor?.name || "Admin",
+      actor?.mqeNumber || "SYSTEM",
+      "RANKS_UPDATED",
+      `Rank definitions updated by ${actor?.name || actingUserEmail}. Total ranks: ${ranks.length}`
+    );
+    saveDB(data);
+    return data.ranks;
+  },
+
+  getDuties: () => getDB().duties || DEFAULT_DUTIES,
+
+  updateDuties: (duties: DutyDefinition[], actingUserEmail: string) => {
+    const data = getDB();
+    const actor = data.members.find(m => m.email === actingUserEmail);
+    data.duties = duties;
+    db.addAuditLog(
+      actingUserEmail,
+      actor?.name || "Admin",
+      actor?.mqeNumber || "SYSTEM",
+      "DUTIES_UPDATED",
+      `Duty definitions updated by ${actor?.name || actingUserEmail}. Total duties: ${duties.length}`
+    );
+    saveDB(data);
+    return data.duties;
+  },
+
+  assignDuty: (memberMqe: string, dutyTitle: string, actingUserEmail: string, notes?: string) => {
+    const data = getDB();
+    const member = data.members.find(m => m.mqeNumber === memberMqe);
+    const actor = data.members.find(m => m.email === actingUserEmail);
+    if (!member) return false;
+
+    if (!member.assignedDuties) member.assignedDuties = [];
+    if (!member.assignedDuties.includes(dutyTitle)) {
+      member.assignedDuties.push(dutyTitle);
+    }
+
+    // Update duty definition holder if matching
+    if (!data.duties) data.duties = [...DEFAULT_DUTIES];
+    const dutyDef = data.duties.find(d => d.title.toLowerCase() === dutyTitle.toLowerCase());
+    if (dutyDef) {
+      dutyDef.holderMqe = member.mqeNumber;
+      dutyDef.holderName = member.name;
+    }
+
+    // Record duty log
+    if (!data.dutyLogs) data.dutyLogs = [];
+    data.dutyLogs.unshift({
+      id: `duty_log_${Date.now()}`,
+      memberMqe: member.mqeNumber,
+      memberName: member.name,
+      dutyTitle,
+      action: "ASSIGNED",
+      assignedBy: actor?.name || actingUserEmail,
+      assignedAt: new Date().toISOString(),
+      notes
+    });
+
+    db.addAuditLog(
+      actingUserEmail,
+      actor?.name || "Admin",
+      actor?.mqeNumber || "SYSTEM",
+      "DUTY_ASSIGNED",
+      `Duty "${dutyTitle}" assigned to ${member.name} (${member.mqeNumber}) by ${actor?.name || actingUserEmail}.`
+    );
+
+    saveDB(data);
+    return true;
+  },
+
+  removeDuty: (memberMqe: string, dutyTitle: string, actingUserEmail: string) => {
+    const data = getDB();
+    const member = data.members.find(m => m.mqeNumber === memberMqe);
+    const actor = data.members.find(m => m.email === actingUserEmail);
+    if (!member) return false;
+
+    if (member.assignedDuties) {
+      member.assignedDuties = member.assignedDuties.filter(d => d.toLowerCase() !== dutyTitle.toLowerCase());
+    }
+
+    if (!data.duties) data.duties = [...DEFAULT_DUTIES];
+    const dutyDef = data.duties.find(d => d.title.toLowerCase() === dutyTitle.toLowerCase());
+    if (dutyDef && dutyDef.holderMqe === memberMqe) {
+      dutyDef.holderMqe = undefined;
+      dutyDef.holderName = undefined;
+    }
+
+    if (!data.dutyLogs) data.dutyLogs = [];
+    data.dutyLogs.unshift({
+      id: `duty_log_${Date.now()}`,
+      memberMqe: member.mqeNumber,
+      memberName: member.name,
+      dutyTitle,
+      action: "REMOVED",
+      assignedBy: actor?.name || actingUserEmail,
+      assignedAt: new Date().toISOString()
+    });
+
+    db.addAuditLog(
+      actingUserEmail,
+      actor?.name || "Admin",
+      actor?.mqeNumber || "SYSTEM",
+      "DUTY_REMOVED",
+      `Duty "${dutyTitle}" removed from ${member.name} (${member.mqeNumber}) by ${actor?.name || actingUserEmail}.`
+    );
+
+    saveDB(data);
+    return true;
+  },
+
+  promoteMember: (memberMqe: string, newRank: string, reason: string, actingUserEmail: string) => {
+    const data = getDB();
+    const member = data.members.find(m => m.mqeNumber === memberMqe);
+    const actor = data.members.find(m => m.email === actingUserEmail);
+    if (!member) return false;
+
+    const previousRank = member.rank;
+    if (previousRank === newRank) return true;
+
+    member.rank = newRank as any;
+    if (!member.previousRanks) member.previousRanks = [];
+    if (!member.previousRanks.includes(previousRank)) {
+      member.previousRanks.push(previousRank);
+    }
+
+    const rec: PromotionRecord = {
+      id: `promo_${Date.now()}`,
+      memberMqe: member.mqeNumber,
+      memberName: member.name,
+      previousRank,
+      newRank,
+      promotedBy: actor?.name || actingUserEmail,
+      promotedAt: new Date().toISOString(),
+      reason
+    };
+
+    if (!member.promotionHistory) member.promotionHistory = [];
+    member.promotionHistory.unshift(rec);
+
+    if (!data.promotions) data.promotions = [];
+    data.promotions.unshift(rec);
+
+    db.addAuditLog(
+      actingUserEmail,
+      actor?.name || "Admin",
+      actor?.mqeNumber || "SYSTEM",
+      "MEMBER_PROMOTED",
+      `Member ${member.name} (${member.mqeNumber}) promoted from "${previousRank}" to "${newRank}". Reason: ${reason}`
+    );
+
+    saveDB(data);
+    return true;
+  },
+
+  transferLordAdmiralOffice: (newHolderMqe: string, reason: string, actingUserEmail: string) => {
+    const data = getDB();
+    const actor = data.members.find(m => m.email === actingUserEmail);
+    const newHolder = data.members.find(m => m.mqeNumber === newHolderMqe);
+    if (!newHolder) return { success: false, message: "Target member not found." };
+
+    if (!data.duties) data.duties = [...DEFAULT_DUTIES];
+    const lordAdmiralDuty = data.duties.find(d => d.title.toLowerCase().includes("lord admiral"));
+
+    let previousHolderMqe = lordAdmiralDuty?.holderMqe || "MQE-0000001";
+    let previousHolderName = lordAdmiralDuty?.holderName || "Admiral David Chukwuyem";
+
+    // Find previous holder member and remove Lord Admiral duty
+    const previousMember = data.members.find(m => m.mqeNumber === previousHolderMqe || (m.assignedDuties && m.assignedDuties.some(d => d.toLowerCase().includes("lord admiral"))));
+    if (previousMember) {
+      previousHolderMqe = previousMember.mqeNumber;
+      previousHolderName = previousMember.name;
+      if (previousMember.assignedDuties) {
+        previousMember.assignedDuties = previousMember.assignedDuties.filter(d => !d.toLowerCase().includes("lord admiral"));
+      }
+      // Note: Previous holder keeps their original rank (Admiral Privateer) as per rules!
+    }
+
+    // Ensure new holder is promoted to Admiral Privateer if not already
+    if (newHolder.rank !== "Admiral Privateer" && newHolder.rank !== MemberRank.ADMIRAL_PRIVATEER) {
+      const oldRank = newHolder.rank;
+      newHolder.rank = "Admiral Privateer" as any;
+      if (!newHolder.previousRanks) newHolder.previousRanks = [];
+      newHolder.previousRanks.push(oldRank);
+      
+      const promoRec: PromotionRecord = {
+        id: `promo_${Date.now()}`,
+        memberMqe: newHolder.mqeNumber,
+        memberName: newHolder.name,
+        previousRank: oldRank,
+        newRank: "Admiral Privateer",
+        promotedBy: actor?.name || actingUserEmail,
+        promotedAt: new Date().toISOString(),
+        reason: "Commissioned to Admiral Privateer upon elevation to Lord Admiral Office."
+      };
+      if (!newHolder.promotionHistory) newHolder.promotionHistory = [];
+      newHolder.promotionHistory.unshift(promoRec);
+      if (!data.promotions) data.promotions = [];
+      data.promotions.unshift(promoRec);
+    }
+
+    // Assign Lord Admiral duty to new holder
+    if (!newHolder.assignedDuties) newHolder.assignedDuties = [];
+    if (!newHolder.assignedDuties.some(d => d.toLowerCase().includes("lord admiral"))) {
+      newHolder.assignedDuties.push("Lord Admiral / Grand Admiral");
+    }
+
+    // Update duty definition holder
+    if (lordAdmiralDuty) {
+      lordAdmiralDuty.holderMqe = newHolder.mqeNumber;
+      lordAdmiralDuty.holderName = newHolder.name;
+    }
+
+    // Record Leadership Transfer
+    const xferRecord: LeadershipTransferRecord = {
+      id: `xfer_${Date.now()}`,
+      officeTitle: "Lord Admiral / Grand Admiral",
+      previousHolderMqe,
+      previousHolderName,
+      newHolderMqe: newHolder.mqeNumber,
+      newHolderName: newHolder.name,
+      transferredAt: new Date().toISOString(),
+      transferredBy: actor?.name || actingUserEmail,
+      reason
+    };
+
+    if (!data.leadershipTransfers) data.leadershipTransfers = [];
+    data.leadershipTransfers.unshift(xferRecord);
+
+    db.addAuditLog(
+      actingUserEmail,
+      actor?.name || "Admin",
+      actor?.mqeNumber || "SYSTEM",
+      "LEADERSHIP_TRANSFERRED",
+      `Lord Admiral office transferred from ${previousHolderName} (${previousHolderMqe}) to ${newHolder.name} (${newHolder.mqeNumber}). Reason: ${reason}`
+    );
+
+    saveDB(data);
+    return { success: true, record: xferRecord };
+  },
+
+  getLeadershipTransfers: () => getDB().leadershipTransfers || DEFAULT_LEADERSHIP_TRANSFERS,
+  getPromotions: () => getDB().promotions || [],
+  getDutyLogs: () => getDB().dutyLogs || [],
 
   updateMember: (updatedMember: Member, actingUserEmail: string) => {
     const data = getDB();

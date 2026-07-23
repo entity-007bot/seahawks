@@ -42,6 +42,8 @@ import {
   Mail
 } from "lucide-react";
 import { PrivateersLogo } from "@/components/privateers-logo";
+import { AdminAccountsManager } from "@/components/admin-accounts-manager";
+import { RankBadge, RankIcon } from "@/components/rank-badge";
 import { useRouter } from "next/navigation";
 import { MemberRank, MemberStatus, ContributionType } from "@/lib/types";
 import { getPublicSiteConfig, savePublicSiteConfig, DEFAULT_PUBLIC_SITE_CONFIG } from "@/lib/site-config";
@@ -290,8 +292,8 @@ export default function DashboardPage() {
     mqeNumber: "",
     biography: "",
     skills: "",
-    suite: "Brass Suite",
-    fleet: "Brass Suite",
+    suite: "",
+    fleet: "",
     rank: MemberRank.PRIVATEER,
     status: MemberStatus.ACTIVE,
     profession: "",
@@ -519,11 +521,11 @@ export default function DashboardPage() {
     if (!localMembers) {
       // Seed data matching lib/db.ts structure
       const defaultMembers = [
-        { id: "mem_1", mqeNumber: "MQE-0000001", name: "Admiral David Chukwuyem", dob: "1988-04-12", phone: "+234 803 111 2222", email: "joedoe@gmail.com", profession: "Marine Superintendent", rank: MemberRank.ADMIRAL, status: MemberStatus.ACTIVE, fleet: "Brass River Fleet", chapter: "Great Niger Delta Chapter", committee: "Disciplinary & Letters of Marque Committee", qrCodeCheckins: ["2026-06-15T10:00:00Z", "2026-07-10T11:00:00Z"], biography: "SAEAHAWKS⚓ Commander of the Great Niger Delta Corsairs Chapter. Overseer of all fleet deployments.", skills: ["Vessel Command", "Saber Fencing"], dateJoined: "2026-01-10", state: "Delta", lga: "Oshimili North", residentialAddress: "14 Escravos Way, Warri", emergencyContact: { name: "Evelyn", relation: "Spouse", phone: "+23480" } },
-        { id: "mem_2", mqeNumber: "MQE-0000123", name: "Captain Jack Sparrow", dob: "1985-06-09", phone: "+234 812 345 6789", email: "jack@corsairs.org", profession: "Deep Sea Navigator", rank: MemberRank.QUARTERMASTER, status: MemberStatus.ACTIVE, fleet: "Brass River Fleet", chapter: "Great Niger Delta Chapter", committee: "Welfare & Cargo Distribution Committee", qrCodeCheckins: ["2026-06-15T10:15:00Z"], biography: "Veteran Privateer and Quartermaster of the GND Chapter.", skills: ["Astrogation"], dateJoined: "2026-01-15", state: "Bayelsa", lga: "Brass", residentialAddress: "Pearl Harbor Marina, Brass", emergencyContact: { name: "Joshamee", relation: "First Mate", phone: "+23481" } },
-        { id: "mem_3", mqeNumber: "MQE-0000244", name: "Privateer Anne Bonny", dob: "1994-11-20", phone: "+234 809 999 8888", email: "anne@corsairs.org", profession: "Offshore Engineer", rank: MemberRank.PRIVATEER, status: MemberStatus.ACTIVE, fleet: "Bonny Estuary Fleet", chapter: "Great Niger Delta Chapter", committee: "Welfare & Cargo Distribution Committee", qrCodeCheckins: ["2026-07-10T11:05:00Z"], biography: "Fierce defender of the GND charter. First female Privateer in the chapter.", skills: ["Diesel Propulsion"], dateJoined: "2026-02-01", state: "Rivers", lga: "Bonny", residentialAddress: "8 Harbour Road, Bonny", emergencyContact: { name: "Calico", relation: "Associate", phone: "+23480" } },
-        { id: "mem_4", mqeNumber: "MQE-0000018", name: "Scribe Edward Teach", dob: "1980-01-01", phone: "+234 803 000 0000", email: "edward@corsairs.org", profession: "Marine Surveyor", rank: MemberRank.SCRIBE, status: MemberStatus.ACTIVE, fleet: "Bonny Estuary Fleet", chapter: "Great Niger Delta Chapter", committee: "Maritime Logistics & Events Committee", qrCodeCheckins: ["2026-06-15T09:55:00Z"], biography: "Chapter Scribe and Chief Archivist. Keeps the log of GND assembly meetings.", skills: ["Ship Restoration"], dateJoined: "2026-01-12", state: "Rivers", lga: "Port Harcourt", residentialAddress: "Queen Anne's Dockyard", emergencyContact: { name: "Israel", relation: "Bosun", phone: "+23480" } },
-        { id: "mem_5", mqeNumber: "MQE-0001092", name: "Recruit Henry Morgan", dob: "1992-07-15", phone: "+234 805 123 4567", email: "henry@corsairs.org", profession: "Coastal Guard", rank: MemberRank.RECRUIT, status: MemberStatus.PENDING, fleet: "Forcados Fleet", chapter: "Great Niger Delta Chapter", committee: "Maritime Logistics & Events Committee", qrCodeCheckins: [], biography: "Eager Recruit seeking full Privateer Letters of Marque.", skills: ["Inshore Patrols"], dateJoined: "2026-06-25", state: "Delta", lga: "Warri South", residentialAddress: "3 Delta Port Road, Warri", emergencyContact: { name: "Lady Mary", relation: "Mother", phone: "+23480" } }
+        { id: "mem_1", mqeNumber: "MQE-0000001", name: "Admiral David Chukwuyem", dob: "1988-04-12", phone: "+234 803 111 2222", email: "joedoe@gmail.com", profession: "Marine Superintendent", rank: MemberRank.ADMIRAL, status: MemberStatus.ACTIVE, fleet: "", chapter: "Great Niger Delta Chapter", committee: "Disciplinary & Letters of Marque Committee", qrCodeCheckins: ["2026-06-15T10:00:00Z", "2026-07-10T11:00:00Z"], biography: "SAEAHAWKS⚓ Commander of the Great Niger Delta Corsairs Chapter. Overseer of all fleet deployments.", skills: ["Vessel Command", "Saber Fencing"], dateJoined: "2026-01-10", state: "Delta", lga: "Oshimili North", residentialAddress: "Warri Port Complex", emergencyContact: { name: "Evelyn", relation: "Spouse", phone: "+23480" } },
+        { id: "mem_2", mqeNumber: "MQE-0000123", name: "Captain Jack Sparrow", dob: "1985-06-09", phone: "+234 812 345 6789", email: "jack@corsairs.org", profession: "Deep Sea Navigator", rank: MemberRank.QUARTERMASTER, status: MemberStatus.ACTIVE, fleet: "", chapter: "Great Niger Delta Chapter", committee: "Welfare & Cargo Distribution Committee", qrCodeCheckins: ["2026-06-15T10:15:00Z"], biography: "Veteran Privateer and Quartermaster of the GND Chapter.", skills: ["Astrogation"], dateJoined: "2026-01-15", state: "Bayelsa", lga: "Brass", residentialAddress: "Pearl Harbor Marina", emergencyContact: { name: "Joshamee", relation: "First Mate", phone: "+23481" } },
+        { id: "mem_3", mqeNumber: "MQE-0000244", name: "Privateer Anne Bonny", dob: "1994-11-20", phone: "+234 809 999 8888", email: "anne@corsairs.org", profession: "Offshore Engineer", rank: MemberRank.PRIVATEER, status: MemberStatus.ACTIVE, fleet: "", chapter: "Great Niger Delta Chapter", committee: "Welfare & Cargo Distribution Committee", qrCodeCheckins: ["2026-07-10T11:05:00Z"], biography: "Fierce defender of the GND charter. First female Privateer in the chapter.", skills: ["Diesel Propulsion"], dateJoined: "2026-02-01", state: "Rivers", lga: "Bonny", residentialAddress: "Harbour Road", emergencyContact: { name: "Calico", relation: "Associate", phone: "+23480" } },
+        { id: "mem_4", mqeNumber: "MQE-0000018", name: "Scribe Edward Teach", dob: "1980-01-01", phone: "+234 803 000 0000", email: "edward@corsairs.org", profession: "Marine Surveyor", rank: MemberRank.SCRIBE, status: MemberStatus.ACTIVE, fleet: "", chapter: "Great Niger Delta Chapter", committee: "Maritime Logistics & Events Committee", qrCodeCheckins: ["2026-06-15T09:55:00Z"], biography: "Chapter Scribe and Chief Archivist. Keeps the log of GND assembly meetings.", skills: ["Ship Restoration"], dateJoined: "2026-01-12", state: "Rivers", lga: "Port Harcourt", residentialAddress: "Queen Anne's Dockyard", emergencyContact: { name: "Israel", relation: "Bosun", phone: "+23480" } },
+        { id: "mem_5", mqeNumber: "MQE-0001092", name: "Recruit Henry Morgan", dob: "1992-07-15", phone: "+234 805 123 4567", email: "henry@corsairs.org", profession: "Coastal Guard", rank: MemberRank.RECRUIT, status: MemberStatus.PENDING, fleet: "", chapter: "Great Niger Delta Chapter", committee: "Maritime Logistics & Events Committee", qrCodeCheckins: [], biography: "Eager Recruit seeking full Privateer Letters of Marque.", skills: ["Inshore Patrols"], dateJoined: "2026-06-25", state: "Delta", lga: "Warri South", residentialAddress: "Delta Port Road", emergencyContact: { name: "Lady Mary", relation: "Mother", phone: "+23480" } }
       ];
       localStorage.setItem("privateers_db_members", JSON.stringify(defaultMembers));
       setMembers(defaultMembers);
@@ -534,7 +536,7 @@ export default function DashboardPage() {
     if (!localContributions) {
       const defaultContributions = [
         { id: "con_1", memberId: "mem_1", memberName: "Admiral David Chukwuyem", mqeNumber: "MQE-0000001", type: ContributionType.ANNUAL_DUES, description: "Annual Privateer Commission Levy for Fiscal Year 2026", amount: 150000, status: "PAID", paymentDate: "2026-01-15T09:00:00Z", recordedBy: "Jack Sparrow (Quartermaster)", auditTrail: [] },
-        { id: "con_2", memberId: "mem_3", memberName: "Privateer Anne Bonny", mqeNumber: "MQE-0000244", type: ContributionType.MONTHLY_DUES, description: "Monthly dues for May 2026 - Bonny Estuary Fleet", amount: 15000, status: "PAID", paymentDate: "2026-05-02T11:45:00Z", recordedBy: "Jack Sparrow (Quartermaster)", auditTrail: [] },
+        { id: "con_2", memberId: "mem_3", memberName: "Privateer Anne Bonny", mqeNumber: "MQE-0000244", type: ContributionType.MONTHLY_DUES, description: "Monthly dues for May 2026", amount: 15000, status: "PAID", paymentDate: "2026-05-02T11:45:00Z", recordedBy: "Jack Sparrow (Quartermaster)", auditTrail: [] },
         { id: "con_3", memberId: "mem_3", memberName: "Privateer Anne Bonny", mqeNumber: "MQE-0000244", type: ContributionType.SPECIAL_LEVY, description: "GND Port Charity Outing Levy", amount: 25000, status: "PAID", paymentDate: "2026-04-10T16:00:00Z", recordedBy: "Jack Sparrow (Quartermaster)", auditTrail: [] },
         { id: "con_4", memberId: "mem_4", memberName: "Scribe Edward Teach", mqeNumber: "MQE-0000018", type: ContributionType.MONTHLY_DUES, description: "Monthly dues for June 2026", amount: 15000, status: "PAID", paymentDate: "2026-06-12T10:00:00Z", recordedBy: "Jack Sparrow (Quartermaster)", auditTrail: [] },
         { id: "con_5", memberId: "mem_3", memberName: "Privateer Anne Bonny", mqeNumber: "MQE-0000244", type: ContributionType.MONTHLY_DUES, description: "Monthly dues for June 2026", amount: 15000, status: "OUTSTANDING", recordedBy: "Jack Sparrow (Quartermaster)", auditTrail: [] }
@@ -575,42 +577,12 @@ export default function DashboardPage() {
         {
           id: "chat_1",
           name: "Admiralty Command Room",
-          description: "Admiral Chukwuyem & Fleet Commanders strategic counsel",
+          description: "Admiral Chukwuyem & Executive Leadership Counsel",
           unread: false,
           messages: [
-            { sender: "Scribe Teach", rank: "Scribe", text: "Admiral, the archival background checks for the new Delta recruits are complete.", time: "10:15 AM" },
+            { sender: "Scribe Teach", rank: "Scribe", text: "Admiral, the archival background checks for the new recruits are complete.", time: "10:15 AM" },
             { sender: "Admiral David Chukwuyem", rank: "Admiral", text: "Excellent, Scribe. Ensure they are fully certified before the next Conclave.", time: "10:20 AM" },
-            { sender: "Captain Jack", rank: "Quartermaster", text: "The Brass River ledgers are ready for your personal sign-off, Admiral.", time: "11:05 AM" }
-          ]
-        },
-        {
-          id: "chat_2",
-          name: "Brass River Fleet Mess",
-          description: "Bayelsa Port Complex local chat & general banter",
-          unread: true,
-          messages: [
-            { sender: "Captain Jack", rank: "Quartermaster", text: "Who left the sailing charts in the mess-room? Scribe Teach is looking for them.", time: "Yesterday" },
-            { sender: "Recruit Henry", rank: "Recruit", text: "I believe Captain Jack has them in his ledger folder. I saw them there earlier.", time: "Yesterday" }
-          ]
-        },
-        {
-          id: "chat_3",
-          name: "Bonny Estuary Fleet Mess",
-          description: "Rivers Port Complex engineering & tactical logs",
-          unread: false,
-          messages: [
-            { sender: "Anne Bonny", rank: "Privateer", text: "The diesel propulsion units on the Bonny Flagship are fully serviced.", time: "Yesterday" },
-            { sender: "Scribe Teach", rank: "Scribe", text: "Splendid job, Anne! Record the maintenance invoice under the vessel ledger.", time: "Yesterday" }
-          ]
-        },
-        {
-          id: "chat_4",
-          name: "Forcados Fleet Mess",
-          description: "Delta Port Complex community coordination",
-          unread: false,
-          messages: [
-            { sender: "Recruit Henry", rank: "Recruit", text: "Is the Warri South coastal cleanup schedule confirmed for Saturday?", time: "2 days ago" },
-            { sender: "Admiral David Chukwuyem", rank: "Admiral", text: "Yes, Henry. Gathering time is exactly 0800 hours at Delta Port Wharf.", time: "2 days ago" }
+            { sender: "Captain Jack", rank: "Quartermaster", text: "The chapter ledgers are ready for your personal sign-off, Admiral.", time: "11:05 AM" }
           ]
         },
         {
@@ -837,6 +809,13 @@ export default function DashboardPage() {
 
   // On mount, load session and database
   useEffect(() => {
+    // Check URL search params for active tab
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get("tab");
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+
     // Check if we have a session in localStorage
     const savedSession = localStorage.getItem("privateers_session");
     const loggedOut = localStorage.getItem("privateers_logged_out");
@@ -2235,55 +2214,21 @@ export default function DashboardPage() {
                             </div>
                           ) : (
                             <div className="space-y-6">
-                              {/* Brass River Fleet Limit */}
+                              {/* Fleet Member Operational Limit */}
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-xs">
-                                  <span className="font-semibold text-slate-300 font-serif">Brass River Fleet Limit</span>
-                                  <span className="font-mono font-bold text-amber-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">{quotaState.brassRiverLimit} Officers</span>
+                                  <span className="font-semibold text-slate-300 font-serif">Global Fleet Officer Limit</span>
+                                  <span className="font-mono font-bold text-amber-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">{quotaState.recruitmentCap} Officers</span>
                                 </div>
                                 <input 
                                   type="range" 
                                   min="5" 
-                                  max="50" 
-                                  value={quotaState.brassRiverLimit} 
-                                  onChange={(e) => handleQuotaChange("brassRiverLimit", parseInt(e.target.value))}
+                                  max="100" 
+                                  value={quotaState.recruitmentCap} 
+                                  onChange={(e) => handleQuotaChange("recruitmentCap", parseInt(e.target.value))}
                                   className="w-full accent-amber-500 h-1.5 bg-slate-950 rounded-lg cursor-pointer"
                                 />
-                                <p className="text-[10px] text-slate-500 font-light">Limits the maximum active ship commissions assigned to the Brass River bearing.</p>
-                              </div>
-
-                              {/* Bonny Estuary Fleet Limit */}
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center text-xs">
-                                  <span className="font-semibold text-slate-300 font-serif">Bonny Estuary Fleet Limit</span>
-                                  <span className="font-mono font-bold text-amber-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">{quotaState.bonnyEstuaryLimit} Officers</span>
-                                </div>
-                                <input 
-                                  type="range" 
-                                  min="5" 
-                                  max="50" 
-                                  value={quotaState.bonnyEstuaryLimit} 
-                                  onChange={(e) => handleQuotaChange("bonnyEstuaryLimit", parseInt(e.target.value))}
-                                  className="w-full accent-amber-500 h-1.5 bg-slate-950 rounded-lg cursor-pointer"
-                                />
-                                <p className="text-[10px] text-slate-500 font-light">Limits the maximum active ship commissions assigned to the Bonny Estuary bearing.</p>
-                              </div>
-
-                              {/* Forcados Fleet Limit */}
-                              <div className="space-y-2">
-                                <div className="flex justify-between items-center text-xs">
-                                  <span className="font-semibold text-slate-300 font-serif">Forcados Fleet Limit</span>
-                                  <span className="font-mono font-bold text-amber-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-850">{quotaState.forcadosLimit} Officers</span>
-                                </div>
-                                <input 
-                                  type="range" 
-                                  min="5" 
-                                  max="50" 
-                                  value={quotaState.forcadosLimit} 
-                                  onChange={(e) => handleQuotaChange("forcadosLimit", parseInt(e.target.value))}
-                                  className="w-full accent-amber-500 h-1.5 bg-slate-950 rounded-lg cursor-pointer"
-                                />
-                                <p className="text-[10px] text-slate-500 font-light">Limits the maximum active ship commissions assigned to the Forcados bearing.</p>
+                                <p className="text-[10px] text-slate-500 font-light">Limits the maximum active ship commissions assigned per created fleet/chapter.</p>
                               </div>
 
                               {/* Monthly Dues Quota */}
@@ -2366,50 +2311,33 @@ export default function DashboardPage() {
                           </h3>
 
                           <div className="space-y-6">
-                            {/* Brass River Fleet Capacity */}
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center text-xs font-mono">
-                                <span className="text-slate-400">Brass River Fleet (10 Active)</span>
-                                <span className="text-slate-200 font-bold">{Math.round((10 / (quotaState.brassRiverLimit || 15)) * 100)}%</span>
+                            {chapters.length > 0 ? (
+                              chapters.map((ch) => {
+                                const count = members.filter(m => m.fleet === ch.name || m.chapter === ch.name).length;
+                                const cap = ch.maxCapacity || 50;
+                                const pct = Math.round((count / cap) * 100);
+                                return (
+                                  <div key={ch.id} className="space-y-2">
+                                    <div className="flex justify-between items-center text-xs font-mono">
+                                      <span className="text-slate-400">{ch.name} ({count} Active)</span>
+                                      <span className="text-slate-200 font-bold">{pct}%</span>
+                                    </div>
+                                    <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-850 p-0.5">
+                                      <div 
+                                        className="h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-500"
+                                        style={{ width: `${Math.min(100, pct)}%` }}
+                                      />
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 font-light">{count} of {cap} maximum officer berths filled.</p>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl text-center space-y-1">
+                                <p className="text-xs text-slate-400 font-mono">No Active Fleets Created</p>
+                                <p className="text-[10px] text-slate-500 font-light">Only Chapter Administration (Africa) can create new Fleets & Chapters.</p>
                               </div>
-                              <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-850 p-0.5">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-amber-600 to-amber-500 rounded-full transition-all duration-500"
-                                  style={{ width: `${Math.min(100, (10 / (quotaState.brassRiverLimit || 15)) * 100)}%` }}
-                                />
-                              </div>
-                              <p className="text-[10px] text-slate-500 font-light">10 of {quotaState.brassRiverLimit} maximum officer berths filled.</p>
-                            </div>
-
-                            {/* Bonny Estuary Fleet Capacity */}
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center text-xs font-mono">
-                                <span className="text-slate-400">Bonny Estuary Fleet (8 Active)</span>
-                                <span className="text-slate-200 font-bold">{Math.round((8 / (quotaState.bonnyEstuaryLimit || 12)) * 100)}%</span>
-                              </div>
-                              <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-850 p-0.5">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-blue-600 to-blue-500 rounded-full transition-all duration-500"
-                                  style={{ width: `${Math.min(100, (8 / (quotaState.bonnyEstuaryLimit || 12)) * 100)}%` }}
-                                />
-                              </div>
-                              <p className="text-[10px] text-slate-500 font-light">8 of {quotaState.bonnyEstuaryLimit} maximum officer berths filled.</p>
-                            </div>
-
-                            {/* Forcados Fleet Capacity */}
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center text-xs font-mono">
-                                <span className="text-slate-400">Forcados Fleet (5 Active)</span>
-                                <span className="text-slate-200 font-bold">{Math.round((5 / (quotaState.forcadosLimit || 10)) * 100)}%</span>
-                              </div>
-                              <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-850 p-0.5">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-red-600 to-red-500 rounded-full transition-all duration-500"
-                                  style={{ width: `${Math.min(100, (5 / (quotaState.forcadosLimit || 10)) * 100)}%` }}
-                                />
-                              </div>
-                              <p className="text-[10px] text-slate-500 font-light">5 of {quotaState.forcadosLimit} maximum officer berths filled.</p>
-                            </div>
+                            )}
 
                             {/* Monthly Dues Capital Quota */}
                             <div className="space-y-2">
@@ -2822,15 +2750,10 @@ export default function DashboardPage() {
                       onChange={(e) => setDirectoryFleet(e.target.value)}
                       className="w-full sm:w-56 bg-slate-950 border border-slate-800 text-xs font-bold text-slate-300 py-2.5 px-3 rounded-lg focus:outline-none focus:border-amber-500 cursor-pointer"
                     >
-                      <option value="All">All Room Suites & Fleets</option>
-                      <option value="Brass Suite">Brass Suite (Admiralty)</option>
-                      <option value="Bonny Estuary Suite">Bonny Estuary Suite</option>
-                      <option value="Forcados Suite">Forcados Suite</option>
-                      <option value="Escravos Suite">Escravos Suite</option>
-                      <option value="Akassa Suite">Akassa Suite</option>
-                      <option value="Opobo Suite">Opobo Suite</option>
-                      <option value="Nembe Suite">Nembe Suite</option>
-                      <option value="Calabar Suite">Calabar Suite</option>
+                      <option value="All">All Fleets & Chapters</option>
+                      {chapters.map((ch) => (
+                        <option key={ch.id} value={ch.name}>{ch.name}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -4173,6 +4096,7 @@ export default function DashboardPage() {
                         { id: "leadership", label: "Leadership Council" },
                         { id: "documents", label: "Archival Library" },
                         { id: "emails", label: "Unique Scribe Mailboxes" },
+                        { id: "admin_accounts", label: "Admin Accounts & Delegations" },
                         { id: "database", label: "Clean Production Launch" }
                       ].map(sub => (
                         <button
@@ -5250,8 +5174,8 @@ export default function DashboardPage() {
                                     mqeNumber: "",
                                     biography: "",
                                     skills: "",
-                                    suite: "Brass Suite",
-                                    fleet: "Brass Suite",
+                                    suite: "",
+                                    fleet: "",
                                     rank: MemberRank.PRIVATEER,
                                     status: MemberStatus.ACTIVE,
                                     profession: "",
@@ -5269,8 +5193,8 @@ export default function DashboardPage() {
                                     mqeNumber: selected.mqeNumber || "",
                                     biography: selected.biography || "",
                                     skills: Array.isArray(selected.skills) ? selected.skills.join(", ") : (selected.skills || ""),
-                                    suite: selected.suite || selected.fleet || "Brass Suite",
-                                    fleet: selected.suite || selected.fleet || "Brass Suite",
+                                    suite: selected.suite || selected.fleet || "",
+                                    fleet: selected.suite || selected.fleet || "",
                                     rank: selected.rank || MemberRank.PRIVATEER,
                                     status: selected.status || MemberStatus.ACTIVE,
                                     profession: selected.profession || "",
@@ -5422,14 +5346,10 @@ export default function DashboardPage() {
                                   onChange={(e) => setMemberForm({ ...memberForm, suite: e.target.value, fleet: e.target.value })}
                                   className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs focus:outline-none focus:border-red-800 text-white"
                                 >
-                                  <option value="Brass Suite">Brass Suite (Admiralty Command)</option>
-                                  <option value="Bonny Estuary Suite">Bonny Estuary Suite</option>
-                                  <option value="Forcados Suite">Forcados Suite</option>
-                                  <option value="Escravos Suite">Escravos Suite</option>
-                                  <option value="Akassa Suite">Akassa Suite</option>
-                                  <option value="Opobo Suite">Opobo Suite</option>
-                                  <option value="Nembe Suite">Nembe Suite</option>
-                                  <option value="Calabar Suite">Calabar Suite</option>
+                                  <option value="">-- No Fleet / Suite Assigned --</option>
+                                  {chapters.map((ch) => (
+                                    <option key={ch.id} value={ch.name}>{ch.name}</option>
+                                  ))}
                                 </select>
                               </div>
 
@@ -6197,6 +6117,12 @@ export default function DashboardPage() {
                           </div>
                         </form>
                       </div>
+                    </div>
+                  )}
+
+                  {adminSubTab === "admin_accounts" && (
+                    <div className="space-y-6 text-left">
+                      <AdminAccountsManager />
                     </div>
                   )}
 
