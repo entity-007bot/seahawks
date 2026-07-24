@@ -1,22 +1,22 @@
 "use client";
 
 import React from "react";
-import { 
-  Crown, 
-  Sparkles, 
-  Ship, 
-  Compass, 
-  Flag, 
-  Award, 
-  ShieldCheck, 
-  Swords, 
-  Shield, 
-  Scroll, 
-  Waves, 
-  Navigation, 
+import {
+  Crown,
+  Sparkles,
+  Ship,
+  Compass,
+  Flag,
+  Award,
+  ShieldCheck,
+  Swords,
+  Shield,
+  Scroll,
+  Waves,
+  Navigation,
   Anchor,
-  BookOpen,
-  UserCheck
+  ChevronUp,
+  Star
 } from "lucide-react";
 
 export interface RankBadgeProps {
@@ -29,6 +29,12 @@ export interface RankBadgeProps {
   variant?: "badge" | "card" | "minimal" | "pill";
 }
 
+/**
+ * Insignia is now expressed as real rank iconography instead of emoji:
+ * - "chevrons": number of stacked chevrons (junior/mid ranks, Seaman Class + junior Privateer Class)
+ * - "stars": number of stars (senior command ranks, mirrors real naval flag-officer insignia)
+ * Rendered via <RankInsignia />, never emoji glyphs.
+ */
 export function getRankDetails(rankInput: string | undefined | null) {
   const r = (rankInput || "").trim().toLowerCase();
 
@@ -39,7 +45,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Admiral",
       class: "Privateer Class",
       tier: 15,
-      insignia: "👑",
+      stars: 4,
+      chevrons: 0,
       Icon: Crown,
       bgClass: "bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-amber-500/10",
       gradientBg: "from-amber-500/30 via-yellow-500/20 to-amber-600/30",
@@ -55,7 +62,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Commodore",
       class: "Privateer Class",
       tier: 14,
-      insignia: "🌟",
+      stars: 3,
+      chevrons: 0,
       Icon: Sparkles,
       bgClass: "bg-amber-400/20 text-amber-200 border-amber-400/40 shadow-amber-400/10",
       gradientBg: "from-amber-400/20 via-amber-500/15 to-yellow-500/20",
@@ -71,7 +79,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Captain",
       class: "Privateer Class",
       tier: 13,
-      insignia: "🚢",
+      stars: 2,
+      chevrons: 0,
       Icon: Ship,
       bgClass: "bg-amber-600/20 text-amber-300 border-amber-500/40",
       gradientBg: "from-amber-600/20 to-amber-700/20",
@@ -87,7 +96,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Commander",
       class: "Privateer Class",
       tier: 12,
-      insignia: "🔱",
+      stars: 1,
+      chevrons: 0,
       Icon: Compass,
       bgClass: "bg-sky-500/20 text-sky-300 border-sky-500/40",
       gradientBg: "from-sky-500/20 to-blue-600/20",
@@ -103,7 +113,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Lieutenant",
       class: "Privateer Class",
       tier: 11,
-      insignia: "🚩",
+      stars: 0,
+      chevrons: 5,
       Icon: Flag,
       bgClass: "bg-blue-500/20 text-blue-300 border-blue-500/40",
       gradientBg: "from-blue-500/20 to-indigo-600/20",
@@ -119,7 +130,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Master Privateer",
       class: "Privateer Class",
       tier: 10,
-      insignia: "🎖️",
+      stars: 0,
+      chevrons: 4,
       Icon: Award,
       bgClass: "bg-purple-500/20 text-purple-300 border-purple-500/40",
       gradientBg: "from-purple-500/20 to-indigo-600/20",
@@ -135,7 +147,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Senior Privateer",
       class: "Privateer Class",
       tier: 9,
-      insignia: "🦅",
+      stars: 0,
+      chevrons: 3,
       Icon: ShieldCheck,
       bgClass: "bg-teal-500/20 text-teal-300 border-teal-500/40",
       gradientBg: "from-teal-500/20 to-emerald-600/20",
@@ -151,7 +164,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Privateer",
       class: "Privateer Class",
       tier: 8,
-      insignia: "🗡️",
+      stars: 0,
+      chevrons: 2,
       Icon: Swords,
       bgClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
       gradientBg: "from-emerald-500/20 to-teal-600/20",
@@ -167,7 +181,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Able Privateer",
       class: "Privateer Class",
       tier: 7,
-      insignia: "⚔️",
+      stars: 0,
+      chevrons: 1,
       Icon: Shield,
       bgClass: "bg-emerald-600/20 text-emerald-300 border-emerald-600/40",
       gradientBg: "from-emerald-600/20 to-green-700/20",
@@ -183,7 +198,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Weathered Seaman",
       class: "Seaman Class",
       tier: 6,
-      insignia: "📜",
+      stars: 0,
+      chevrons: 5,
       Icon: Scroll,
       bgClass: "bg-amber-900/30 text-amber-300 border-amber-700/40",
       gradientBg: "from-amber-900/30 to-amber-800/20",
@@ -199,7 +215,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Seasoned Seaman",
       class: "Seaman Class",
       tier: 5,
-      insignia: "🛡️",
+      stars: 0,
+      chevrons: 4,
       Icon: Shield,
       bgClass: "bg-slate-700/30 text-slate-200 border-slate-600/40",
       gradientBg: "from-slate-700/30 to-slate-800/20",
@@ -215,7 +232,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Salted Seaman",
       class: "Seaman Class",
       tier: 4,
-      insignia: "🌊",
+      stars: 0,
+      chevrons: 3,
       Icon: Waves,
       bgClass: "bg-cyan-600/20 text-cyan-300 border-cyan-500/40",
       gradientBg: "from-cyan-600/20 to-blue-700/20",
@@ -231,7 +249,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Able Seaman",
       class: "Seaman Class",
       tier: 3,
-      insignia: "🧭",
+      stars: 0,
+      chevrons: 2,
       Icon: Navigation,
       bgClass: "bg-slate-800 text-slate-300 border-slate-700",
       gradientBg: "from-slate-800 to-slate-900",
@@ -247,7 +266,8 @@ export function getRankDetails(rankInput: string | undefined | null) {
       shortName: "Seaman",
       class: "Seaman Class",
       tier: 2,
-      insignia: "⛵",
+      stars: 0,
+      chevrons: 1,
       Icon: Navigation,
       bgClass: "bg-slate-800 text-slate-300 border-slate-700",
       gradientBg: "from-slate-800 to-slate-900",
@@ -262,13 +282,51 @@ export function getRankDetails(rankInput: string | undefined | null) {
     shortName: rankInput || "Landsman",
     class: "Seaman Class",
     tier: 1,
-    insignia: "⚓",
+    stars: 0,
+    chevrons: 0,
     Icon: Anchor,
     bgClass: "bg-slate-800/80 text-slate-400 border-slate-700/60",
     gradientBg: "from-slate-800/50 to-slate-900/50",
     accentColor: "text-slate-400",
     glowColor: "shadow-slate-800/10"
   };
+}
+
+/**
+ * Renders real rank insignia (stacked chevrons for junior/mid ranks,
+ * stars for flag officers) instead of an emoji glyph — modeled on how
+ * actual military/naval sleeve and shoulder insignia communicate rank.
+ */
+function RankInsignia({
+  stars,
+  chevrons,
+  size = 10,
+  className = ""
+}: {
+  stars: number;
+  chevrons: number;
+  size?: number;
+  className?: string;
+}) {
+  if (stars > 0) {
+    return (
+      <span className={`inline-flex items-center gap-[1px] ${className}`}>
+        {Array.from({ length: stars }).map((_, i) => (
+          <Star key={i} size={size} className="fill-current" />
+        ))}
+      </span>
+    );
+  }
+  if (chevrons > 0) {
+    return (
+      <span className={`inline-flex flex-col items-center leading-none ${className}`} style={{ gap: -size * 0.35 }}>
+        {Array.from({ length: chevrons }).map((_, i) => (
+          <ChevronUp key={i} size={size} style={{ marginTop: i === 0 ? 0 : -size * 0.55 }} />
+        ))}
+      </span>
+    );
+  }
+  return null;
 }
 
 export function RankBadge({
@@ -281,13 +339,20 @@ export function RankBadge({
   variant = "badge"
 }: RankBadgeProps) {
   const details = getRankDetails(rank);
-  const { Icon, insignia, bgClass, accentColor, name } = details;
+  const { Icon, bgClass, accentColor, name, stars, chevrons } = details;
 
   const iconSizes = {
     xs: 12,
     sm: 14,
     md: 16,
     lg: 20
+  };
+
+  const insigniaSizes = {
+    xs: 7,
+    sm: 8,
+    md: 9,
+    lg: 11
   };
 
   const badgeSizes = {
@@ -300,7 +365,7 @@ export function RankBadge({
   if (variant === "minimal") {
     return (
       <span className={`inline-flex items-center gap-1.5 font-medium ${accentColor} ${className}`} title={`${name} (${details.class} - Tier ${details.tier})`}>
-        {showInsignia && <span className="select-none">{insignia}</span>}
+        {showInsignia && <RankInsignia stars={stars} chevrons={chevrons} size={insigniaSizes[size]} />}
         <Icon size={iconSizes[size]} className="shrink-0" />
         {showLabel && <span>{name}</span>}
       </span>
@@ -310,7 +375,7 @@ export function RankBadge({
   if (variant === "pill") {
     return (
       <span className={`inline-flex items-center rounded-full border ${bgClass} ${badgeSizes[size]} font-mono font-semibold transition-all ${className}`}>
-        {showInsignia && <span className="select-none">{insignia}</span>}
+        {showInsignia && <RankInsignia stars={stars} chevrons={chevrons} size={insigniaSizes[size]} />}
         <Icon size={iconSizes[size]} className="shrink-0" />
         {showLabel && <span>{name}</span>}
         {showTier && <span className="text-[9px] opacity-75 font-mono">T{details.tier}</span>}
@@ -320,7 +385,7 @@ export function RankBadge({
 
   return (
     <span className={`inline-flex items-center rounded-lg border ${bgClass} ${badgeSizes[size]} font-mono font-medium shadow-sm transition-all ${className}`}>
-      {showInsignia && <span className="select-none">{insignia}</span>}
+      {showInsignia && <RankInsignia stars={stars} chevrons={chevrons} size={insigniaSizes[size]} />}
       <Icon size={iconSizes[size]} className="shrink-0" />
       {showLabel && <span>{name}</span>}
       {showTier && <span className="text-[10px] opacity-80 border-l border-current/30 pl-1 ml-0.5">T{details.tier}</span>}
@@ -343,16 +408,16 @@ export function RankIcon({
   showGlow?: boolean;
 }) {
   const details = getRankDetails(rank);
-  const { Icon, insignia, bgClass, accentColor, glowColor } = details;
+  const { Icon, bgClass, accentColor, glowColor, stars, chevrons } = details;
 
   return (
-    <div 
+    <div
       className={`relative inline-flex items-center justify-center rounded-xl p-1.5 border ${bgClass} ${showGlow ? glowColor : ""} ${className}`}
       title={`${details.name} (${details.class} - Tier ${details.tier})`}
     >
       <Icon size={size} className={`${accentColor} shrink-0`} />
-      <span className="absolute -top-1 -right-1 text-[10px] leading-none select-none">
-        {insignia}
+      <span className="absolute -top-1.5 -right-1.5">
+        <RankInsignia stars={stars} chevrons={chevrons} size={Math.max(8, size * 0.35)} />
       </span>
     </div>
   );
