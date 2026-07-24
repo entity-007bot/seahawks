@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- MEMBERS ----------
+
+model Member {
+  id                  String   @id @default(cuid())
+  mqeNumber           String   @unique
+  name                String
+  preferredName       String?
+  dob                 String?
+  gender              String?
+  nationality         String?
+  state               String?
+  lga                 String?
+  occupation          String?
+  phone               String?
+  email               String   @unique
+  residentialAddress  String?
+
+  emergencyContactName     String?
+  emergencyContactRelation String?
+  emergencyContactPhone    String?
+
+  skills              String[] @default([])
+  profession          String?
+  biography           String?
+  dateJoined          String
+  rank                String   @default("Landsman")
+  assignedDuties      String[] @default([])
+  previousRanks       String[] @default([])
+  adminRole           String?
+  status              String   @default("Active")
+  suite               String?
+  fleet               String?
+  chapter             String?
+  committee           String?
+  serviceRecord       String[] @default([])
+  awards              String[] @default([])
+  disciplinaryRecord  String[] @default([])
+  profilePhoto        String?
+  qrCodeCheckins      String[] @default([])
+  nin                 String?
+  voterId             String?
+  refereeMqe          String?
+
+  password            String?
+
+  promotionHistory    PromotionRecord[]
+  forumPosts          ForumPost[]
+  forumComments       ForumComment[]
+  contributions       Contribution[]     @relation("MemberContributions")
+  auditLogs           AuditLog[]
+  leadershipRoles     LeadershipMember[]
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ---------- ADMIN ACCOUNTS ----------
+
+model AdminUser {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  role        String
+  password    String
+  superAdmin  Boolean  @default(false)
+  status      String   @default("Active")
+  createdAt   DateTime @default(now())
+  createdBy   String?
+}
+
+// ---------- APPLICATIONS ----------
+
+model Application {
+  id                 String   @id @default(cuid())
+  memberId           String?
+  applicantMqe       String?
+  applicantName      String
+  dob                String?
+  phone              String?
+  email              String
+  chapterPreference  String?
+  status             String   @default("Pending")
+
+  decisionHistory    Json?
+
+  interviewStatus    String?
+  interviewNotes     String?
+  backgroundStatus   String?
+  adminNotes         String?
+  approvalStatus     String?
+  approvalHistory    Json?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// ---------- CONTRIBUTIONS ----------
+
+model Contribution {
+  id            String   @id @default(cuid())
+  memberId      String
+  member        Member   @relation("MemberContributions", fields: [memberId], references: [id])
+  memberName    String
+  memberMqe     String
+  type          String
+  description   String?
+  amount        Float
+  status        String   @default("OUTSTANDING")
+  paymentDate   String?
+  recordedBy    String?
+  auditTrail    Json?
+
+  createdAt     DateTime @default(now())
+}
+
+// ---------- FORUM ----------
+
+model ForumPost {
+  id              String    @id @default(cuid())
+  category        String
+  title           String
+  content         String
+  authorId        String
+  author          Member    @relation(fields: [authorId], references: [id])
+  authorName      String
+  authorRank      String
+  likes           String[]  @default([])
+  isPinned        Boolean   @default(false)
+  isAnnouncement  Boolean   @default(false)
+  comments        ForumComment[]
+  createdAt       DateTime  @default(now())
+}
+
+model ForumComment {
+  id          String     @id @default(cuid())
+  postId      String
+  post        ForumPost  @relation(fields: [postId], references: [id])
+  authorId    String
+  author      Member     @relation(fields: [authorId], references: [id])
+  authorName  String
+  authorRank  String
+  content     String
+  createdAt   DateTime   @default(now())
+}
+
+// ---------- ELECTIONS ----------
+
+model Election {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  votingStart   String
+  votingEnd     String
+  status        String   @default("UPCOMING")
+  candidates    Json
+  votedMqes     String[] @default([])
+  winner        String?
+  createdAt     DateTime @default(now())
+}
+
+// ---------- EVENTS ----------
+
+model EventLog {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  date            String
+  time            String?
+  location        String?
+  meetingLink     String?
+  coverImage      String?
+  rsvps           Json?
+  attendanceList  String[] @default([])
+  reports         String?
+  createdAt       DateTime @default(now())
+}
+
+// ---------- DOCUMENTS ----------
+
+model DocumentFile {
+  id              String   @id @default(cuid())
+  title           String
+  category        String
+  fileUrl         String
+  versionHistory  Json?
+  uploadedAt      DateTime @default(now())
+}
+
+// ---------- AUDIT ----------
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userEmail   String
+  userName    String
+  userMqe     String
+  memberId    String?
+  member      Member?  @relation(fields: [memberId], references: [id])
+  action      String
+  details     String
+  timestamp   DateTime @default(now())
+}
+
+// ---------- LEADERSHIP ----------
+
+model LeadershipMember {
+  id             String   @id @default(cuid())
+  memberId       String
+  member         Member   @relation(fields: [memberId], references: [id])
+  memberMqe      String
+  name           String
+  duty           String
+  appointedDate  String
+  status         String   @default("ACTIVE")
+}
+
+// ---------- PROMOTIONS ----------
+
+model PromotionRecord {
+  id            String   @id @default(cuid())
+  memberId      String
+  member        Member   @relation(fields: [memberId], references: [id])
+  memberMqe     String
+  memberName    String
+  previousRank  String
+  newRank       String
+  promotedBy    String
+  promotedAt    DateTime @default(now())
+  reason        String?
+}
