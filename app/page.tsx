@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  Anchor, 
   Compass, 
   BookOpen, 
   Map, 
@@ -98,7 +97,7 @@ export default function PublicPage() {
     { 
       id: "home", 
       label: "Home", 
-      icon: Anchor,
+      icon: Compass,
       title: siteConfig.brandName,
       subtitle: siteConfig.tagline,
       content: (
@@ -112,7 +111,7 @@ export default function PublicPage() {
             <p className="text-lg md:text-xl font-serif text-white italic">&ldquo;{siteConfig.corePhilosophy}&rdquo;</p>
           </div>
           <p className="text-slate-300 text-sm md:text-base font-light leading-relaxed">
-            Welcome to the central Quarterdeck of SAEAHAWKS. Inspired by the historic age of exploration, we adopt the noble traditions of maritime communities: strategic navigation, mutual responsibility, courage, and disciplined leadership to forge positive community impact.
+            Welcome to the central Quarterdeck of CORSAIRS. Inspired by the historic age of exploration, we adopt the noble traditions of maritime communities: strategic navigation, mutual responsibility, courage, and disciplined leadership to forge positive community impact.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <button
@@ -203,7 +202,7 @@ export default function PublicPage() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {[
             { title: "The Compass", val: "Wisdom", desc: "Represents absolute direction, decision-making, and moral wisdom." },
-            { title: "The Anchor", val: "Loyalty", desc: "Represents stability, loyalty, and deep commitment to the Fleet." },
+            { title: "The Compass", val: "Loyalty", desc: "Represents direction, integrity, and steady commitment to the Association." },
             { title: "The Chart", val: "Strategy", desc: "Represents detailed planning, forward vision, and operational strategy." },
             { title: "The Lantern", val: "Guidance", desc: "Represents knowledge, truth, and providing guidance to recruits." },
             { title: "The Flag", val: "Unity", desc: "Represents our unified purpose, shared honor, and sovereign community." }
@@ -255,7 +254,7 @@ export default function PublicPage() {
       label: "Code of Honor", 
       icon: Award,
       title: "Our Six Core Values",
-      subtitle: "Unwavering Anchors of Character & Conduct",
+      subtitle: "A Steady Compass for Character & Conduct",
       content: (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
@@ -313,7 +312,7 @@ export default function PublicPage() {
       content: (
         <div className="space-y-4 text-slate-300 text-sm leading-relaxed font-light">
           <p>
-            Our ultimate commission is service. We translate private enterprise, naval discipline, and community leadership into lasting public development. SAEAHAWKS⚓ coordinates structural support across local coastal ports and vulnerable delta communities.
+            Our ultimate commission is service. We translate private enterprise, naval discipline, and community leadership into lasting public development. CORSAIRS🧭 coordinates structural support across local coastal ports and vulnerable delta communities.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -337,7 +336,7 @@ export default function PublicPage() {
       label: "Chapters & Fleets", 
       icon: Map, 
       title: "Sovereign Fleets & Chapters",
-      subtitle: "Active Nautical Jurisdictions of SAEAHAWKS⚓",
+      subtitle: "Active Nautical Jurisdictions of CORSAIRS🧭",
       content: (
         <div className="space-y-4 text-slate-300 text-sm leading-relaxed font-light">
           <p>
@@ -1200,10 +1199,10 @@ export default function PublicPage() {
             
             <div className="space-y-2 pt-2 text-xs font-mono text-slate-400">
               <p className="flex items-center gap-2">
-                <span className="text-amber-500">⚓</span> Scribe Mailbox: <span className="text-white font-semibold">scribe@corsairs-fellowship.org</span>
+                <span className="text-amber-500">🧭</span> Scribe Mailbox: <span className="text-white font-semibold">scribe@corsairs-fellowship.org</span>
               </p>
               <p className="flex items-center gap-2">
-                <span className="text-amber-500">⚓</span> Command Office: <span className="text-white font-semibold">joedoe@gmail.com</span>
+                <span className="text-amber-500">🧭</span> Command Office: <span className="text-white font-semibold">joedoe@gmail.com</span>
               </p>
             </div>
           </div>
@@ -1328,7 +1327,7 @@ export default function PublicPage() {
               },
               { 
                 channel: "LinkedIn", 
-                tag: "SAEAHAWKS⚓", 
+                tag: "CORSAIRS🧭", 
                 followers: "8.9K Professionals", 
                 status: "All Hands Together", 
                 icon: Linkedin,
@@ -1371,10 +1370,10 @@ export default function PublicPage() {
             <PrivateersLogo size={55} />
             <div className="space-y-0.5">
               <p className="font-serif text-base text-amber-500 font-bold tracking-wide">
-                Privateers & Corsairs Fellowship
+                National Association of Privateers
               </p>
               <p className="text-xs text-slate-500 font-mono uppercase tracking-wider">
-                SAEAHAWKS⚓ • Commissioned for Service. Bound by Honor.
+                CORSAIRS 🧭 Unithel Mariners Association — Gentlemen of Fortune, Bound by Honor.
               </p>
             </div>
           </div>
@@ -1384,14 +1383,14 @@ export default function PublicPage() {
             <button onClick={() => setShowLegal("privacy")} className="hover:text-white transition-colors cursor-pointer">Privacy Policy</button>
             <button onClick={() => setShowLegal("terms")} className="hover:text-white transition-colors cursor-pointer">Terms of Commission</button>
             <Link href="/portal?mode=register" className="hover:text-amber-500 transition-colors">Apply for Commission</Link>
-            <Link href="/portal?mode=login" className="hover:text-amber-500 transition-colors">Quarterdeck Access</Link>
+            <Link href="/portal?mode=login" className="hover:text-amber-500 transition-colors">Marque Access</Link>
           </div>
 
           {/* Copyright with Symbolic Nautical Motto */}
           <div className="text-center md:text-right space-y-1">
             <p className="text-[10px] text-amber-500/60 font-mono italic">&ldquo;Until Safe Harbor&rdquo;</p>
             <p className="text-xs text-slate-600 font-mono">
-              © 2026 Privateers & Corsairs. All Commissions Sovereign.
+              © 2026 National Association of Privateers — Unithel Mariners Association. All Marques Sovereign.
             </p>
           </div>
         </div>
@@ -1418,7 +1417,7 @@ export default function PublicPage() {
                 <div className="h-0.5 bg-amber-500 w-16"></div>
                 <div className="text-xs text-slate-400 leading-relaxed font-light space-y-3">
                   <p className="font-semibold text-amber-500">1. Privateer Data Confidentiality</p>
-                  <p>SAEAHAWKS⚓ guarantees that all private member information (NIN, email details, residential provincial address, and MQE commission histories) is held under absolute seal. No data is ever leased or shared with external merchant networks.</p>
+                  <p>CORSAIRS🧭 guarantees that all private member information (NIN, email details, residential provincial address, and MQE commission histories) is held under absolute seal. No data is ever leased or shared with external merchant networks.</p>
                   
                   <p className="font-semibold text-amber-500">2. Portal Cryptography</p>
                   <p>Our secure member portal utilizes advanced cryptographic handshakes to encrypt sessions and secure signatures. Your verified digital MQE credential serves as your secure token.</p>
